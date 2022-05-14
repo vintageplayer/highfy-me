@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/core": "^0.8.0",
     "@walletconnect/web3-provider": "^1.7.8",
     "ethers": "^5.6.5",
+    "framer-motion": "^6.3.3",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
+    "react-icons": "^4.3.1",
     "walletlink": "^2.5.0",
     "web3modal": "^1.9.7"
   },
