@@ -4,10 +4,11 @@ import { useEffect, useState, useContext } from "react";
 import Main from "../components/Main";
 import SignIn from "../components/SignIn";
 
+import Web3Context from "../context/web3/Web3Context";
 import UserContext from "../context/user/UserContext";
 
 const App = () => {
-  const {address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners } = useContext(UserContext);
+  const {address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners } = useContext(Web3Context);
 
   const connectHandler = async (e) => {
     await connect();
