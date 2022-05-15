@@ -11,7 +11,6 @@ import {
 	Avatar,
 	AspectRatioBox
 } from '@chakra-ui/core';
-import { MdArchive } from "react-icons/md"; // Icons
 
 export default function Email() {
 	const { message } = {message: {payload: "<h1>Is this the real life?</h1>"}}
@@ -45,21 +44,7 @@ export default function Email() {
 			<>
 				<Flex justify='space-around' wrap='no-wrap' mb={2}>
 					<ReplyModel />
-					<ForwardModel />					
-					<Button
-						rightIcon={MdArchive}
-						variantColor='blue'
-						variant='outline'
-					>
-						Archive
-					</Button>
-					<Button
-						rightIcon='delete'
-						variantColor='blue'
-						variant='outline'
-					>
-						Delete
-					</Button>
+					<ForwardModel />
 				</Flex>
 
 				{/* Mail Container */}
