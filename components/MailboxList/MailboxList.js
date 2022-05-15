@@ -2,6 +2,7 @@ import {useState} from 'react';
 import { Button, Box, List, ListItem } from "@chakra-ui/core";
 import { MdLabel, MdStar, MdPeople, MdLoyalty, MdInbox } from "react-icons/md";
 import { FiSend, FiFile } from "react-icons/fi";
+import SendModel from "./SendModel";
 
 export default function Main ({address}) {
 	const [active, setActive] = useState("INBOX");
@@ -24,7 +25,7 @@ export default function Main ({address}) {
 	      <List>
 	        {/* Send Model */}
 	        <ListItem p='0.5rem 1rem 1rem'>
-	          {/*<SendModel />*/}
+	          <SendModel />
 	        </ListItem>
 
 	        {/* Labels Buttons */}
