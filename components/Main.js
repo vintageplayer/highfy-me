@@ -1,4 +1,5 @@
 import MailboxList from "./MailboxList/MailboxList";
+import EmailList from "./EmailList/EmailList";
 import { Flex } from "@chakra-ui/core";
 
 export default function Main ({address}) {
@@ -14,6 +15,7 @@ export default function Main ({address}) {
 	      color='white'
 	    >
 	      <MailboxList />
+	      <EmailList />
 	    </Flex>
 	);
 }
