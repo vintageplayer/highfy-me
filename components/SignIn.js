@@ -29,7 +29,7 @@ export default function SignIn ({web3Loading, web3Provider, connectHandler, disc
 		            Connect Wallet
 		          </CustomButton>
 		        )}
-		        { (!web3Provider || !userExists) &&
+		        { (web3Provider && !web3Loading && !userLoading && !userExists) &&
 		          <CustomButton isLoading={web3Loading || userLoading} mr={3} onClick={createAccountHandler}> 
 		        	Create Account
 		          </CustomButton>
