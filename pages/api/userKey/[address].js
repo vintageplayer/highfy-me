@@ -16,7 +16,6 @@ export default async function userPublicKeyHandler({ query: { address } }, res) 
           keyCID
         }
       }`;
-  console.log(queryString);
   const userKeyRes = await executeGraphQuery(queryString);
   const userKeyCID = await userKeyRes.json()
 

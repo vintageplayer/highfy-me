@@ -1,7 +1,7 @@
 import UserContext from "./UserContext";
 import {useReducer} from 'react';
 import UserReducer, {initialState} from "./UserReducer";
-import {getUserDetails, fetchKeys} from '../../utils/mailUtils'
+import {createAccount, getUserDetails, fetchKeys} from '../../utils/mailUtils'
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -9,12 +9,11 @@ const EmailState = (props) => {
 	const loginUser = async (address) => {
 		setLoading();
 		const userDetails = await getUserDetails(address);
-		// const cid = userDetails['data']['account']['keyCID'];
-		const cid = null;
-		if (!cid) {
+		if (!userDetails['data']['account']) {
 			setUserNotFound()
 			return // User Not Found
 		}
+		const cid = userDetails['data']['account']['keyCID'];
 		const keys = await fetchKeys(address, cid);
 		console.log('User Logged In');
 		dispatch({
@@ -25,6 +24,11 @@ const EmailState = (props) => {
 			inbox: userDetails['data']['account']['inbox'],
 			sent: userDetails['data']['account']['mailsSent']			
 		});
+	}
+
+	const createUser = async(address, w3) => {
+		setLoading();
+		createAccount(address, w3)
 	}
 
 	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
@@ -42,7 +46,8 @@ const EmailState = (props) => {
 				inbox: state.inbox,
 				mailsSent: state.mailsSent,
 				loginUser: loginUser,
-				resetUser: resetUser
+				resetUser: resetUser,
+				createUser: createUser
 			}}
 		>
 			{props.children}

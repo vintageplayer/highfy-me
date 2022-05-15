@@ -33,7 +33,6 @@ export default async function userMailDetailsHandler({ query: { address } }, res
           }
         }
       }`;
-  console.log(queryString);
   const userDataRes = await executeGraphQuery(queryString);
   const userData = await userDataRes.json();
 

@@ -21,9 +21,7 @@ export const getUserDetails = async (address) => {
 	const userDetailsResponse = await fetch(detailsEndpoint);
 	if (userDetailsResponse.status == 200) {
 		const userDetailsResponseJson = await userDetailsResponse.json();
-		if (userDetailsResponseJson['data']['account']) {
 			return  userDetailsResponseJson
-		}
 	}
 }
 
@@ -63,7 +61,7 @@ export const decryptMail = async (encryptedMail) => {
 	return mailData;
 }
 
-export const emitCreateAccount = async (address, keyCID, contract) => {
+const emitCreateAccount = async (address, keyCID, contract) => {
 	const txHash = await contract.methods.createAccount(keyCID).send({from: address});
 	console.log(txHash);
 }
@@ -79,6 +77,34 @@ export const getMails = async() => {
 		return JSON.parse(await decryptMail(mailFileData));
 	}));
 	return mails;
+}
+
+export const createAccount = async (address, chainId) => {
+	contract = await getContract(chainId);
+	console.log(contract);
+	const { privateKey, publicKey } = await generateKeyPair(passphrase);
+	const keyData = {
+		privateKey: privateKey,
+		publicKey: publicKey,
+		passphrase: passphrase
+	}
+
+	// Encrypt keys & passphrase with wallet
+	const encryptedKeyData = await encryptUsingWallet(keyData, address);
+	const encryptedKeyFileName = `web3_mail_info`;
+	const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
+
+
+	// Upload Public Key to IPFS
+	const publicKeyData = JSON.stringify({
+		publicKey: publicKey
+	});
+	const publicKeyFileName = `web3_mail_pkey`;
+	const publicKeyFile = makeFileObject(publicKeyData, publicKeyFileName);
+	const keyCID = await storeFilesOnIPFS([encryptedKeyFile, publicKeyFile])
+	// Emit Event with address, and the CID
+	console.log(keyCID);
+	await emitCreateAccount(address, keyCID, contract);
 }
 
 export const sendMail = async (mailObject, contract) => {
@@ -107,9 +133,9 @@ export const sendMail = async (mailObject, contract) => {
 	return dataCID;	
 }
 
-export const getContract = async (w3) => {
-	const networkId = await w3.eth.net.getId();
-	const deployedNetwork = mailContract.networks[networkId];
+export const getContract = async (chainId) => {
+	const deployedNetwork = mailContract.networks[chainId];
+	console.log(deployedNetwork);
 	let c = new w3.eth.Contract(mailContract.abi, deployedNetwork.address);
 	console.log(deployedNetwork.address);
 	return c;
