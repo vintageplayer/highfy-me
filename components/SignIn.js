@@ -1,72 +1,36 @@
-export default function SignIn ({web3Provider, connectHandler, disconnectHandler}) {
+import { Flex, Button } from "@chakra-ui/core";
+
+export default function SignIn ({web3Loading, web3Provider, connectHandler, disconnectHandler, userExists, userLoading}) {
 	return (
 		<div>
 	      <main>
-	        <h1 className="title">Web3Modal Example</h1>
-	        {web3Provider ? (
-	          <button className="button" type="button" onClick={disconnectHandler}>
-	            Disconnect
-	          </button>
-	        ) : (
-	          <button className="button" type="button" onClick={connectHandler}>
-	            Connect
-	          </button>
-	        )}
+	        <h1 className="title">Troth Me </h1>
+        	<Flex h='100vh' justify='center' alignItems='center' bg='#e5f4f1'>
+		        {web3Provider ? (
+		          <Button
+		          	isLoading={userLoading}
+		          	height='50px'
+		          	variantColor='blue'
+		          	variant='outline'
+		          	backgroundColor='white'
+		          	onClick={disconnectHandler}
+		          >
+		            Disconnect
+		          </Button>
+		        ) : (
+		          <Button
+		          	isLoading={web3Loading}
+		          	height='50px'
+		          	variantColor='blue'
+		          	variant='outline'
+		          	backgroundColor='white'
+		          	onClick={connectHandler}
+		          >
+		            Connect Wallet
+		          </Button>
+		        )}
+	        </Flex>
 	      </main>
-
-	      <style jsx>{`
-	        main {
-	          padding: 5rem 0;
-	          text-align: center;
-	        }
-
-	        p {
-	          margin-top: 0;
-	        }
-
-	        .container {
-	          padding: 2rem;
-	          margin: 0 auto;
-	          max-width: 1200px;
-	        }
-
-	        .grid {
-	          display: grid;
-	          grid-template-columns: auto auto;
-	          justify-content: space-between;
-	        }
-
-	        .button {
-	          padding: 1rem 1.5rem;
-	          background: ${web3Provider ? 'red' : 'green'};
-	          border: none;
-	          border-radius: 0.5rem;
-	          color: #fff;
-	          font-size: 1.2rem;
-	        }
-
-	        .mb-0 {
-	          margin-bottom: 0;
-	        }
-	        .mb-1 {
-	          margin-bottom: 0.25rem;
-	        }
-	      `}</style>
-
-	      <style jsx global>{`
-	        html,
-	        body {
-	          padding: 0;
-	          margin: 0;
-	          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-	            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-	            sans-serif;
-	        }
-
-	        * {
-	          box-sizing: border-box;
-	        }
-	      `}</style>
 		</div>
 	);
 }

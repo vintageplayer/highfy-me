@@ -64,6 +64,7 @@ const Web3State = (props) => {
 	}
 
 	const connect = async () => {
+		setLoading();
 		if (typeof window !== 'undefined' && !state.web3Modal) {
 			state.web3Modal = new Web3Modal({
 				network: 'mainnet', // optional
@@ -107,9 +108,12 @@ const Web3State = (props) => {
 	  })
 	}
 
+	const setLoading = () => dispatch({ type: 'SET_LOADING' });
+
 	return (
 		<Web3Context.Provider
 			value={{
+				web3Loading: state.web3Loading,
 				provider: state.provider,
 				web3Provider: state.web3Provider,
 				address: state.address,

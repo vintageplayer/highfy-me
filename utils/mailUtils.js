@@ -1,7 +1,6 @@
 import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from '../utils/web3StorageUtils'
 import {encryptMessage, decryptMessage, decryptUsingWallet} from './encryptionUtils'
-import UserProfile from './user'
-import {mailContract} from '../lib/contracts'
+// import {mailContract} from '../lib/contracts'
 import Web3 from "web3";
 
 
@@ -28,7 +27,7 @@ export const getUserDetails = async (address) => {
 	}
 }
 
-const fetchKeys = async (address, cid) => {
+export const fetchKeys = async (address, cid) => {
 	// If Account Exists, the CID should be available
 	// const cid = 'bafybeibhqhlmj47j4rzzwye2pvvxldpgjj27mg3jkllxzzplst2dcqnwe4';		
 	// const address = '0x13782baA7DDf58ECf4A0FD9F38Fd003f9955b217';
@@ -79,20 +78,6 @@ export const emitCreateAccount = async (address, keyCID, contract) => {
 const emitSendMail = async (from, to, dataCID, contract) => {
 	const txHash = await contract.methods.sendMail(to, dataCID).send({from: from});
 	console.log(txHash);
-}
-
-export const loginUser = async (address) => {
-	const userDetails = await getUserDetails(address);
-	// const cid = await getUserKeyCID(address);
-	const cid = userDetails['data']['account']['keyCID'];
-	if (!cid) {
-		return
-	}
-	UserProfile.setKeys(await fetchKeys(address, cid));
-	UserProfile.setInbox(userDetails['data']['account']['inbox']);
-	UserProfile.setSent(userDetails['data']['account']['mailsSent']);
-	console.log(UserProfile.getInbox());
-	console.log('User Logged In');
 }
 
 export const getMails = async() => {	

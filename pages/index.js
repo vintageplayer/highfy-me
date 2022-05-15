@@ -8,7 +8,8 @@ import Web3Context from "../context/web3/Web3Context";
 import UserContext from "../context/user/UserContext";
 
 const App = () => {
-  const {address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners } = useContext(Web3Context);
+  const {web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners } = useContext(Web3Context);
+  const {userExists, userLoading, loggedInUser, loginUser, resetUser} = useContext(UserContext);
 
   const connectHandler = async (e) => {
     await connect();
@@ -36,15 +37,25 @@ const App = () => {
     }
   }, [provider, disconnect])
 
+  useEffect(() => {
+    if (address && address!==loggedInUser) {
+      resetUser();
+      loginUser(address);
+    }
+  }, [address])
+
   return (    
     <>
-      {address ?  (
+      { (address && loggedInUser == address) ?  (
         <Main address={address} />
       ) : 
         (<SignIn
+          web3Loading={web3Loading}
           web3Provider={web3Provider}
           connectHandler={connectHandler}
           disconnectHandler={disconnectHandler}
+          userExists={userExists}
+          userLoading={userLoading}
         />)
       }
     </>

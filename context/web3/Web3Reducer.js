@@ -1,4 +1,5 @@
 export const initialState = {
+  web3Loading: false,
   web3Modal: null,
   provider: null,
   web3Provider: null,
@@ -15,6 +16,7 @@ function web3Reducer(state, action) {
         web3Provider: action.web3Provider,
         address: action.address,
         chainId: action.chainId,
+        web3Loading: false,
       }
     case 'SET_ADDRESS':
       return {
@@ -28,6 +30,11 @@ function web3Reducer(state, action) {
       }
     case 'RESET_WEB3_PROVIDER':
       return initialState
+    case 'SET_LOADING':
+      return {
+        ...state,
+        web3Loading: true,
+      }
     default:
       return state;
   }
