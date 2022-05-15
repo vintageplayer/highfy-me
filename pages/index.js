@@ -37,15 +37,15 @@ const App = () => {
 
   return (    
     <>
-      {address && (
+      {address ?  (
         <Main address={address} />
-      )} 
-        <SignIn
+      ) : 
+        (<SignIn
           web3Provider={web3Provider}
           connectHandler={connectHandler}
           disconnectHandler={disconnectHandler}
-        />
-      
+        />)
+      }
     </>
   );
 };

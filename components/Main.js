@@ -1,5 +1,6 @@
 import MailboxList from "./MailboxList/MailboxList";
 import EmailList from "./EmailList/EmailList";
+import Email from "./Email/Email";
 import { Flex } from "@chakra-ui/core";
 
 export default function Main ({address}) {
@@ -16,6 +17,7 @@ export default function Main ({address}) {
 	    >
 	      <MailboxList />
 	      <EmailList />
+	      <Email />
 	    </Flex>
 	);
 }
