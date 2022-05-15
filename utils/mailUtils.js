@@ -1,4 +1,4 @@
-import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from '../utils/web3StorageUtils'
+import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from './web3StorageUtils'
 import {encryptMessage, decryptMessage, decryptUsingWallet} from './encryptionUtils'
 // import {mailContract} from '../lib/contracts'
 import Web3 from "web3";
@@ -28,13 +28,6 @@ export const getUserDetails = async (address) => {
 }
 
 export const fetchKeys = async (address, cid) => {
-	// If Account Exists, the CID should be available
-	// const cid = 'bafybeibhqhlmj47j4rzzwye2pvvxldpgjj27mg3jkllxzzplst2dcqnwe4';		
-	// const address = '0x13782baA7DDf58ECf4A0FD9F38Fd003f9955b217';
-
-	// const cid = await getUserKeyCID(address);
-
-
 	// Given CID, fetch the file
 	const keyFileData = await retrieveFile(cid, 'web3_mail_info', 'blob');
 	const encryptedKeyData = `0x${keyFileData}`;
@@ -87,20 +80,6 @@ export const getMails = async() => {
 	}));
 	return mails;
 }
-
-// export const getMails = async(user) => {
-	// const cids = [
-	// 	"bafybeifblgpfoqmegmoxuqpys43dcer7up55twlwojk7sqfqe6xo5gouna",
-	// 	"bafybeichoujfhhsaood5bh32dgkphgyf7efudn24qrvtmidvked6p7qera",
-	// 	"bafybeif63x5rrvxgnhi7cydfbuarpqm5epbujfb7gpilsliokawylbrkoi",
-	// 	"bafybeiacqjd6izxnoy5wmdvy4wrdnv6obftdtsbypbekpdsg3raiza5n2y"
-	// 	];
-	// const mails = await Promise.all(cids.map(async (cid) => {
-	// 	const mailFileData = await retrieveFile(cid, 'web3_mail', 'blob');
-	// 	return JSON.parse(await decryptMail(mailFileData));
-	// }));
-	// return mails;
-// }
 
 export const sendMail = async (mailObject, contract) => {
 	const receiver = mailObject['to'];

@@ -42,7 +42,10 @@ const App = () => {
       resetUser();
       loginUser(address);
     }
-  }, [address])
+    return () => {
+      resetUser();
+    }
+  }, [address, loggedInUser])
 
   return (    
     <>
