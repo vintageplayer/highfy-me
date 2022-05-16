@@ -14,20 +14,35 @@ const EmailState = (props) => {
 			return // User Not Found
 		}
 		const cid = userDetails['data']['account']['keyCID'];
-		const keys = await fetchKeys(address, cid);
+		const keys = JSON.parse(await fetchKeys(address, cid));
 		console.log('User Logged In');
 		const inboxCIDs= userDetails['data']['account']['inbox'];
 		const sentCIDs= userDetails['data']['account']['mailsSent'];
-		const inboxMessages = await getMails(userDetails['data']['account']['inbox'], keys, 'inbox');
-		const sentMessages = await getMails(userDetails['data']['account']['mailsSent'], keys, 'sent');
 
 		dispatch({
 			type: 'LOGIN_USER',
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: {...state.allCIDs, "INBOX": inboxCIDs, "SENT": sentCIDs},
-			allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
+			allCIDs: {...state.allCIDs, "INBOX": inboxCIDs, "SENT": sentCIDs}
+			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
+		});
+	}
+
+	const getMessages = async () => {
+		setLoading();
+		let messages;
+		if (state.activeList === 'INBOX'){
+			messages = await getMails(state.allCIDs['INBOX'], state.userKeys, 'inbox');
+		} else if(state.activeList === 'SENT') {
+			messages = await getMails(state.allCIDs['SENT'], state.userKeys, 'sent');
+		} else {
+			messages = [];
+		}
+
+		dispatch({
+			type: 'SET_MESSAGES',
+			payload: messages
 		});
 	}
 
@@ -67,7 +82,8 @@ const EmailState = (props) => {
 				resetUser: resetUser,
 				createUser: createUser,
 				setMessage: setMessage,
-				setActiveList: setActiveList
+				setActiveList: setActiveList,
+				getMessages: getMessages
 			}}
 		>
 			{props.children}

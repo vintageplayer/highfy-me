@@ -53,9 +53,8 @@ const encryptMail = async (mailObject, publicKey) => {
 	return encrypted;
 }
 
-export const decryptMail = async (encryptedMail, keys) => {
+export const decryptMail = async (encryptedMail, userKeys) => {
 	// Keys should be fetched once per login and stored somewhere
-	const userKeys = JSON.parse(keys);
 	try {
 		const mailData = await decryptMessage(encryptedMail, userKeys['privateKey'], userKeys['passphrase']);
 		return mailData;

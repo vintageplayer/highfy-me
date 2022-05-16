@@ -1,10 +1,16 @@
+import {useEffect, useContext} from 'react';
+import { Flex } from "@chakra-ui/core";
 import MailboxList from "./MailboxList/MailboxList";
 import EmailList from "./EmailList/EmailList";
 import Email from "./Email/Email";
-import { Flex } from "@chakra-ui/core";
+import UserContext from "../context/user/UserContext";
 
 export default function Main ({address}) {
+	const {getMessages} = useContext(UserContext);
 
+	useEffect(() => {
+		getMessages()
+	}, []);
 	return (
 	    <Flex
 	      h='100vh'

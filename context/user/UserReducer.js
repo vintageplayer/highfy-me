@@ -21,23 +21,29 @@ export default function UserReducer(state, action) {
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
 				userKeys: action.keys,
-				messages: action.allMails["INBOX"],
 				message: null,
 				activeLabel: "INBOX",
-				allCIDs: action.allCIDs,
-				allMails: action.allMails
+				allCIDs: action.allCIDs
+				// allMails: action.allMails
 			}
 		case 'SET_ACTIVE_LIST':
 			return {
 				...state,
 				activeList: action.payload,
-				messages: state.allMails[action.payload],
+				messages: [],
 				message: null
 			}
 		case 'SET_MESSAGE':
 			return {
 				...state,
-				message: action.payload
+				message: action.payload,
+				userLoading: false
+			}
+		case 'SET_MESSAGES':
+			return {
+				...state,
+				messages: action.payload,
+				userLoading: false
 			}
 		case 'CLEAR_MESSAGES':
 			return {
