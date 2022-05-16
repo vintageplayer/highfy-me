@@ -43,7 +43,7 @@ export default function Email() {
 			<EmptyEmail />
 			) : (
 			<>
-				<Flex justify='space-around' wrap='no-wrap' mb={2}>
+				<Flex justify='space-between' wrap='no-wrap' mb={2}>
 					<ReplyModel />
 					<ForwardModel />
 				</Flex>
@@ -57,8 +57,9 @@ export default function Email() {
 				>
 					<Box mb={2}>
 						<Text fontSize='lg' fontWeight='bold' color='gray.700' mb={1}>
-							{message['subject']}
+							Subject: {message['subject']}
 						</Text>
+
 						<Flex wrap='no-wrap' justify='flex-start'>
 							<Avatar
 								name={message['from']}
@@ -78,6 +79,7 @@ export default function Email() {
 							To: {message['to']}
 						</Text>
 					</Box>
+					<hr />
 					<Box flexGrow='2'>
 						<AspectRatioBox ratio={16 / 9} h='100%'>
 							<Box as='iframe' id='messageBodyIframe' title='messageBody'>

@@ -24,7 +24,7 @@ export default function ReplyModel() {
 				variant='outline'
 				onClick={onOpen}
 			>
-				Replay
+				Reply
 			</Button>
 			<Modal
 				isOpen={isOpen}
