@@ -57,17 +57,17 @@ export default function Email() {
 				>
 					<Box mb={2}>
 						<Text fontSize='lg' fontWeight='bold' color='gray.700' mb={1}>
-							Subject: First Mail for Addresses
+							{message['subject']}
 						</Text>
 						<Flex wrap='no-wrap' justify='flex-start'>
 							<Avatar
-								name={'From: 0x137...d'}
+								name={message['from']}
 								src='https://bit.ly/tioluwani-kolawole'
 								mr={4}
 							/>
 							<Box w='80%'>
 								<Text fontSize='md' color='gray.700'>
-									From: 0x137...d
+									From: {message['from']}
 								</Text>
 								<Text fontSize='sm' color='gray.500'>
 									15-May-2022
@@ -75,7 +75,7 @@ export default function Email() {
 							</Box>
 						</Flex>
 						<Text fontSize='sm' color='gray.700' mt={1}>
-							To: 0x65...342
+							To: {message['to']}
 						</Text>
 					</Box>
 					<Box flexGrow='2'>
