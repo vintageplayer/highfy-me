@@ -1,7 +1,8 @@
 import EmptyEmail from './EmptyEmail';
 import ReplyModel from "./ReplyModel";
 import ForwardModel from "./ForwardModel";
-import {useEffect} from 'react';
+import {useContext, useEffect} from 'react';
+import UserContext from '../../context/user/UserContext';
 
 import {
 	Flex,
@@ -13,7 +14,7 @@ import {
 } from '@chakra-ui/core';
 
 export default function Email() {
-	const { message } = {message: {payload: "<h1>Is this the real life?</h1>"}}
+	const { message } = useContext(UserContext);
 	useEffect(() => {
 		if (message) {
 			addToFrame(message);
@@ -21,7 +22,7 @@ export default function Email() {
 	}, [message]);
 	const addToFrame = (message) => {
 		let ifrm = document.getElementById("messageBodyIframe").contentWindow.document;
-		ifrm.body.innerHTML = message.payload;
+		ifrm.body.innerHTML = message.body;
 	};
 
 	return (
