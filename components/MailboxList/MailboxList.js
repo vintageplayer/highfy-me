@@ -1,15 +1,16 @@
-import {useState} from 'react';
+import {useContext} from 'react';
 import { Button, Box, List, ListItem } from "@chakra-ui/core";
 import { MdLabel, MdStar, MdPeople, MdLoyalty, MdInbox } from "react-icons/md";
 import { FiSend, FiFile } from "react-icons/fi";
 import SendModel from "./SendModel";
+import UserContext from "../../context/user/UserContext";
 
 export default function Main ({address}) {
-	const [active, setActive] = useState("INBOX");
+	const {activeList, setActiveList} = useContext(UserContext);
 
 	const selectMailList = (e) => {
-		const categoryId = e.target.id;
-		setActive(categoryId);
+		const listId = e.target.id;
+		setActiveList(listId);
 	}
 
 	return (
@@ -38,7 +39,7 @@ export default function Main ({address}) {
 	            pl={8}
 	            leftIcon={MdInbox}
 	            variantColor='blue'
-	            variant={active === "INBOX" ? "solid" : "ghost"}
+	            variant={activeList === "INBOX" ? "solid" : "ghost"}
 	            justifyContent='flex-start'
 	            onClick={selectMailList}
 	          >
@@ -54,7 +55,7 @@ export default function Main ({address}) {
 	            pl={8}
 	            leftIcon={MdStar}
 	            variantColor='blue'
-	            variant={active === "COLLECT" ? "solid" : "ghost"}
+	            variant={activeList === "COLLECT" ? "solid" : "ghost"}
 	            justifyContent='flex-start'
 	            onClick={selectMailList}
 	          >
@@ -63,14 +64,14 @@ export default function Main ({address}) {
 	        </ListItem>
 	        <ListItem>
 	          <Button
-	            id='CATEGORY_SUBSCRIPTIONS'
+	            id='SUBSCRIPTIONS'
 	            w='100%'
 	            h='45px'
 	            py={2}
 	            pl={8}
 	            leftIcon={MdPeople}
 	            variantColor='blue'
-	            variant={active === "CATEGORY_SUBSCRIPTIONS" ? "solid" : "ghost"}
+	            variant={activeList === "SUBSCRIPTIONS" ? "solid" : "ghost"}
 	            justifyContent='flxex-start'
 	            onClick={selectMailList}
 	          >
@@ -86,7 +87,7 @@ export default function Main ({address}) {
 	            pl={8}
 	            leftIcon={FiSend}
 	            variantColor='blue'
-	            variant={active === "SENT" ? "solid" : "ghost"}
+	            variant={activeList === "SENT" ? "solid" : "ghost"}
 	            justifyContent='flex-start'
 	            onClick={selectMailList}
 	          >
@@ -95,14 +96,14 @@ export default function Main ({address}) {
 	        </ListItem>
 	        <ListItem>
 	          <Button
-	            id='CATEGORY_SPAM'
+	            id='SPAM'
 	            w='100%'
 	            h='45px'
 	            py={2}
 	            pl={8}
 	            leftIcon={MdLoyalty}
 	            variantColor='blue'
-	            variant={active === "CATEGORY_SPAM" ? "solid" : "ghost"}
+	            variant={activeList === "SPAM" ? "solid" : "ghost"}
 	            justifyContent='flxex-start'
 	            onClick={selectMailList}
 	          >

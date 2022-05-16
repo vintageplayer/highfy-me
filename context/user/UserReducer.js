@@ -6,7 +6,7 @@ export const initialState = {
 	userKeys: null,
 	messages: [],
 	message: null,
-	currentLabel: "INBOX",
+	activeList: "INBOX",
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []}
 }
@@ -23,15 +23,15 @@ export default function UserReducer(state, action) {
 				userKeys: action.keys,
 				messages: action.allMails["INBOX"],
 				message: null,
-				currentLabel: "INBOX",
+				activeLabel: "INBOX",
 				allCIDs: action.allCIDs,
 				allMails: action.allMails
 			}
-		case 'SET_CURRENT_LABEL':
+		case 'SET_ACTIVE_LIST':
 			return {
 				...state,
-				currentLabel: action.currentLabel,
-				messages: allMails[action.currentLabel],
+				activeList: action.payload,
+				messages: state.allMails[action.payload],
 				message: null
 			}
 		case 'SET_MESSAGE':

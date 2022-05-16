@@ -19,7 +19,7 @@ const EmailState = (props) => {
 		const inboxCIDs= userDetails['data']['account']['inbox'];
 		const sentCIDs= userDetails['data']['account']['mailsSent'];
 		const inboxMessages = await getMails(userDetails['data']['account']['inbox'], keys, 'inbox');
-		// const sentMessages = await getMails(userDetails['data']['account']['mailsSent'], keys, 'sent');
+		const sentMessages = await getMails(userDetails['data']['account']['mailsSent'], keys, 'sent');
 
 		dispatch({
 			type: 'LOGIN_USER',
@@ -27,11 +27,11 @@ const EmailState = (props) => {
 			keyCID: cid,
 			keys: keys,
 			allCIDs: {...state.allCIDs, "INBOX": inboxCIDs, "SENT": sentCIDs},
-			allMails: {...state.allMails, "INBOX": inboxMessages}
+			allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
 		});
 	}
 
-	const setCurrentLabel = (labelId) => dispatch({ type: 'SET_CURRENT_LABEL', payload: labelId });
+	const setActiveList = (listId) => dispatch({ type: 'SET_ACTIVE_LIST', payload: listId });
 
 	const setMessage = (message) => dispatch({ type: 'SET_MESSAGE', payload: message});
 
@@ -54,12 +54,14 @@ const EmailState = (props) => {
 				userExists: state.userExists,
 				userLoading: state.userLoading,
 				loggedInUser: state.loggedInUser,
+				activeList: state.activeList,
 				messages: state.messages,
 				message: state.message,
 				loginUser: loginUser,
 				resetUser: resetUser,
 				createUser: createUser,
-				setMessage: setMessage
+				setMessage: setMessage,
+				setActiveList: setActiveList
 			}}
 		>
 			{props.children}
