@@ -16,59 +16,37 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/core";
+import {sendMail} from '../../utils/mailUtils'
 
-const SendModel = () => {
+const SendModel = ({loggedInUser, contract}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const emailTo = form.elements["emailTo"].value;
+    const receiver = form.elements["emailTo"].value;
     const subject = form.elements["subject"].value;
-    const message = form.elements["message"].value;
+    const mailBody = form.elements["message"].value;
 
-    // Send Simple Mail && Display Toast
-    sendMessage(
-      {
-        To: emailTo,
-        Subject: subject,
-      },
-      message,
-      displayToast
-    );
-
-    onClose();
-  };
-
-  const sendMessage = (headers_obj, message, callback) => {
-    let email = "";
-
-    for (var header in headers_obj)
-      email += header += ": " + headers_obj[header] + "\r\n";
-
-    email += "\r\n" + message;
-
-    // const base64EncodedEmail = Base64.encodeURI(email);
-    // const request = window.gapi.client.gmail.users.messages.send({
-    //   userId: "me",
-    //   resource: {
-    //     raw: base64EncodedEmail,
-    //   },
-    // });
-    // request.execute(callback);
-  };
-
-  const displayToast = ({ result }) => {
-    if (result.labelIds.indexOf("SENT") !== -1) {
+    const mailObject = {
+      to: receiver,
+      from: loggedInUser,
+      subject: subject,
+      body: mailBody
+    }
+    
+    try {
       toast({
-        title: "Message Sent.",
-        description: "We've Sent your email.",
-        status: "success",
-        duration: 9000,
+        title: "Processing Mail.",
+        description: "Processing your email for decentralised communication.",
+        status: "info",
+        duration: 3000,
         isClosable: true,
       });
-    } else {
+      onClose();
+      await sendMail(mailObject, contract);
+    } catch {
       toast({
         title: "An error occurred.",
         description: "Unable to sent your email.",
@@ -76,7 +54,7 @@ const SendModel = () => {
         duration: 9000,
         isClosable: true,
       });
-    }
+    }        
   };
 
   return (
@@ -106,7 +84,7 @@ const SendModel = () => {
             <ModalBody>
               <FormControl isRequired>
                 <Input
-                  type='email'
+                  type='text'
                   id='emailTo'
                   placeholder='To'
                   aria-describedby='email-helper-text'

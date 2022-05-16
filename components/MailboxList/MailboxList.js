@@ -4,9 +4,11 @@ import { MdLabel, MdStar, MdPeople, MdLoyalty, MdInbox } from "react-icons/md";
 import { FiSend, FiFile } from "react-icons/fi";
 import SendModel from "./SendModel";
 import UserContext from "../../context/user/UserContext";
+import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main ({address}) {
-	const {activeList, setActiveList} = useContext(UserContext);
+	const {loggedInUser, activeList, setActiveList} = useContext(UserContext);
+	const {contract} = useContext(Web3Context);
 
 	const selectMailList = (e) => {
 		const listId = e.target.id;
@@ -26,7 +28,7 @@ export default function Main ({address}) {
 	      <List>
 	        {/* Send Model */}
 	        <ListItem p='0.5rem 1rem 1rem'>
-	          <SendModel />
+	          <SendModel loggedInUser={loggedInUser} contract={contract} />
 	        </ListItem>
 
 	        {/* Labels Buttons */}
