@@ -6,11 +6,12 @@ import Email from "./Email/Email";
 import UserContext from "../context/user/UserContext";
 
 export default function Main ({address}) {
-	const {getMessages} = useContext(UserContext);
+	const {setActiveList, loggedInUser} = useContext(UserContext);
 
 	useEffect(() => {
-		getMessages()
-	}, []);
+		setActiveList("INBOX");
+	}, [loggedInUser]);
+	
 	return (
 	    <Flex
 	      h='100vh'

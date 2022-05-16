@@ -7,13 +7,14 @@ import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main ({address}) {
-	const {loggedInUser, activeList, setActiveList, getMessages} = useContext(UserContext);
+	const {userLoading ,loggedInUser, activeList, setActiveList} = useContext(UserContext);
 	const {contract} = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
 		const listId = e.target.id;
-		setActiveList(listId);
-		await getMessages();
+		if (listId !== activeList && !userLoading) {
+			await setActiveList(listId);
+		}
 	}
 
 	return (

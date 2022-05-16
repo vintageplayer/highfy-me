@@ -29,20 +29,15 @@ export default function UserReducer(state, action) {
 		case 'SET_ACTIVE_LIST':
 			return {
 				...state,
-				activeList: action.payload,
-				messages: [],
-				message: null
+				activeList: action.list,
+				messages: action.messages,
+				message: null,
+				userLoading: false
 			}
 		case 'SET_MESSAGE':
 			return {
 				...state,
 				message: action.payload,
-				userLoading: false
-			}
-		case 'SET_MESSAGES':
-			return {
-				...state,
-				messages: action.payload,
 				userLoading: false
 			}
 		case 'CLEAR_MESSAGES':

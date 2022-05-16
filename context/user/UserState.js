@@ -29,24 +29,25 @@ const EmailState = (props) => {
 		});
 	}
 
-	const getMessages = async () => {
-		setLoading();
-		let messages;
-		if (state.activeList === 'INBOX'){
-			messages = await getMails(state.allCIDs['INBOX'], state.userKeys, 'inbox');
-		} else if(state.activeList === 'SENT') {
-			messages = await getMails(state.allCIDs['SENT'], state.userKeys, 'sent');
+	const getMessages = async (listId) => {
+		if (listId === 'INBOX'){
+			return await getMails(state.allCIDs['INBOX'], state.userKeys, 'inbox');
+		} else if(listId === 'SENT') {
+			return await getMails(state.allCIDs['SENT'], state.userKeys, 'sent');
 		} else {
-			messages = [];
+			return [];
 		}
-
-		dispatch({
-			type: 'SET_MESSAGES',
-			payload: messages
-		});
 	}
 
-	const setActiveList = (listId) => dispatch({ type: 'SET_ACTIVE_LIST', payload: listId });
+	const setActiveList = async (listId) => {
+		setLoading();
+		const messages = await getMessages(listId);
+		dispatch({
+			type: 'SET_ACTIVE_LIST',
+			list: listId,
+			messages: messages
+		});
+	} 
 
 	const setMessage = (message) => dispatch({ type: 'SET_MESSAGE', payload: message});
 

@@ -6,7 +6,7 @@ import UserContext from '../../context/user/UserContext';
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const Messages = () => {
-	const {messages, setMessage} = useContext(UserContext);
+	const {activeList, messages, setMessage} = useContext(UserContext);
 	
 	const messageClickHandler = (e) => {
 		const messageId = e.currentTarget.getAttribute('id');
