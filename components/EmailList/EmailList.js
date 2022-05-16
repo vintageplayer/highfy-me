@@ -1,5 +1,39 @@
+import {useContext} from 'react';
 import {Flex, Box, Spinner} from '@chakra-ui/core';
-import SearchBar from "./SearchBar";
+import SearchBar from './SearchBar';
+import EmailRow from "./EmailRow";
+import UserContext from '../../context/user/UserContext';
+import InfiniteScroll from "react-infinite-scroll-component";
+
+const Messages = () => {
+	const {messages, setMessage} = useContext(UserContext);
+	
+	const messageClickHandler = (e) => {
+		const messageId = e.currentTarget.getAttribute('id');
+		setMessage(messages[messageId]);
+	}
+
+	return (
+		<Box overflow='auto' id='scrollableDiv'>
+			<InfiniteScroll
+				dataLength={messages.length}
+				next={() => {}}
+				hasMore={false}
+				loader={<h4>Loading...</h4>}
+				scrollableTarget='scrollableDiv'
+			>
+				{messages.map((message, index) => (
+					<EmailRow
+						key={index}
+						message={message}
+						messageIndex={index}
+						messageClickHandler={messageClickHandler}
+					/>
+				))}
+			</InfiniteScroll>
+		</Box>
+		)
+}
 
 const CustomSpinner = () => (
   <Box mt={6} display='flex' align='center' justifyContent='center'>
@@ -14,6 +48,8 @@ const CustomSpinner = () => (
 );
 
 export default function EmailList () {
+	const {messages, userLoading} = useContext(UserContext);
+
 	return (
 		<Flex
 			direction='column'
@@ -24,7 +60,7 @@ export default function EmailList () {
 			color='black'
 		>
 		<SearchBar />
-		<CustomSpinner />
+		{!messages.length && userLoading ? <CustomSpinner /> : <Messages />}
 		</Flex>
 	);
 }

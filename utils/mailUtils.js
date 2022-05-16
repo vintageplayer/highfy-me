@@ -54,11 +54,15 @@ const encryptMail = async (mailObject, publicKey) => {
 	return encrypted;
 }
 
-export const decryptMail = async (encryptedMail) => {
+export const decryptMail = async (encryptedMail, keys) => {
 	// Keys should be fetched once per login and stored somewhere
-	const userKeys = JSON.parse(UserProfile.getKeys());
-	const mailData = await decryptMessage(encryptedMail, userKeys['privateKey'], userKeys['passphrase']);
-	return mailData;
+	const userKeys = JSON.parse(keys);
+	try {
+		const mailData = await decryptMessage(encryptedMail, userKeys['privateKey'], userKeys['passphrase']);
+		return mailData;
+	} catch {
+		return {};
+	}	
 }
 
 const emitCreateAccount = async (address, keyCID, contract) => {
@@ -71,12 +75,11 @@ const emitSendMail = async (from, to, dataCID, contract) => {
 	console.log(txHash);
 }
 
-export const getMails = async() => {	
-	const mails = await Promise.all(UserProfile.getInbox().map(async (mailItem) => {
-		const mailFileData = await retrieveFile(mailItem['id'], 'inbox', 'blob');
-		return JSON.parse(await decryptMail(mailFileData));
+export const getMails = async(mailItems, keys, type) => {
+	return await Promise.all(mailItems.map(async (mailItem) => {
+		const mailFileData = await retrieveFile(mailItem['id'], type, 'blob');
+		return {...JSON.parse(await decryptMail(mailFileData, keys)), id: mailItem['id']};
 	}));
-	return mails;
 }
 
 export const createAccount = async (address, chainId) => {

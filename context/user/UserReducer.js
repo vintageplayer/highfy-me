@@ -4,8 +4,11 @@ export const initialState = {
 	loggedInUser: null,
 	keyCID: null,
 	userKeys: null,
-	inbox: null,
-	mailsSent: null
+	messages: [],
+	message: null,
+	currentLabel: "INBOX",
+	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
+	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []}
 }
 
 export default function UserReducer(state, action) {
@@ -18,8 +21,29 @@ export default function UserReducer(state, action) {
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
 				userKeys: action.keys,
-				inbox: action.inbox,
-				mailsSent: action.mailsSent
+				messages: action.allMails["INBOX"],
+				message: null,
+				currentLabel: "INBOX",
+				allCIDs: action.allCIDs,
+				allMails: action.allMails
+			}
+		case 'SET_CURRENT_LABEL':
+			return {
+				...state,
+				currentLabel: action.currentLabel,
+				messages: allMails[action.currentLabel],
+				message: null
+			}
+		case 'SET_MESSAGE':
+			return {
+				...state,
+				message: action.payload
+			}
+		case 'CLEAR_MESSAGES':
+			return {
+				...state,
+				messages: [],
+				message: null
 			}
 		case 'USER_NOT_FOUND':
 			return {
