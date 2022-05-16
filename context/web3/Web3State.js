@@ -1,11 +1,11 @@
 import {useReducer} from 'react';
 import Web3Context from "./Web3Context";
 import Web3Reducer, {initialState} from "./Web3Reducer";
-import { providers } from 'ethers';
-
+import Web3 from 'web3'
 import Web3Modal from 'web3modal';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import WalletLink from 'walletlink';
+import {mailContract} from './contractDetails'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
@@ -38,6 +38,12 @@ const providerOptions = {
       return provider
     },
   },
+}
+
+const getContract = async (web3Provider, chainId) => {
+	const deployedNetwork = mailContract.networks[chainId];
+	let c = new web3Provider.eth.Contract(mailContract.abi, deployedNetwork.address);
+	return c;
 }
 
 const Web3State = (props) => {
@@ -74,10 +80,11 @@ const Web3State = (props) => {
 		}
 
 		const provider = await state.web3Modal.connect()
-		const web3Provider = new providers.Web3Provider(provider)
-		const signer = web3Provider.getSigner()
-		const address = await signer.getAddress()
-		const network = await web3Provider.getNetwork()
+		const web3Provider = new Web3(ethereum);
+		const accounts = await web3Provider.eth.getAccounts();
+		const address = accounts[0];
+		const networkId = await web3Provider.eth.net.getId();
+		const contract = await getContract(web3Provider, networkId);
 
 		provider.on('accountsChanged', handleAccountsChanged)
 		provider.on('chainChanged', handleChainChanged)
@@ -88,7 +95,8 @@ const Web3State = (props) => {
 		  provider,
 		  web3Provider,
 		  address,
-		  chainId: network.chainId,
+		  chainId: networkId,
+		  contract: contract
 		})
 	};
 
@@ -118,6 +126,7 @@ const Web3State = (props) => {
 				web3Provider: state.web3Provider,
 				address: state.address,
 				chainId: state.chainId,
+				contract: state.contract,
 				web3Modal: state.web3Modal,
 				connect,
 				disconnect

@@ -1,6 +1,5 @@
 import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from './web3StorageUtils'
-import {encryptMessage, decryptMessage, decryptUsingWallet} from './encryptionUtils'
-// import {mailContract} from '../lib/contracts'
+import {encryptMessage, decryptMessage, encryptUsingWallet, decryptUsingWallet, generateKeyPair} from './encryptionUtils'
 import Web3 from "web3";
 
 
@@ -82,9 +81,8 @@ export const getMails = async(mailItems, keys, type) => {
 	}));
 }
 
-export const createAccount = async (address, chainId) => {
-	contract = await getContract(chainId);
-	console.log(contract);
+export const createAccount = async (address, contract) => {
+	const passphrase = 'super long and hard to guess secret'
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
 		privateKey: privateKey,
@@ -105,9 +103,15 @@ export const createAccount = async (address, chainId) => {
 	const publicKeyFileName = `web3_mail_pkey`;
 	const publicKeyFile = makeFileObject(publicKeyData, publicKeyFileName);
 	const keyCID = await storeFilesOnIPFS([encryptedKeyFile, publicKeyFile])
+
 	// Emit Event with address, and the CID
-	console.log(keyCID);
 	await emitCreateAccount(address, keyCID, contract);
+	const result = {
+		address: address,
+		keys: keyData,
+		keyCID: keyCID
+	};
+	return result;
 }
 
 export const sendMail = async (mailObject, contract) => {
@@ -134,12 +138,4 @@ export const sendMail = async (mailObject, contract) => {
 	console.log(dataCID);
 	await emitSendMail(sender, receiver, dataCID, contract);
 	return dataCID;	
-}
-
-export const getContract = async (chainId) => {
-	const deployedNetwork = mailContract.networks[chainId];
-	console.log(deployedNetwork);
-	let c = new w3.eth.Contract(mailContract.abi, deployedNetwork.address);
-	console.log(deployedNetwork.address);
-	return c;
 }

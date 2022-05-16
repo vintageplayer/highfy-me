@@ -4,7 +4,8 @@ export const initialState = {
   provider: null,
   web3Provider: null,
   address: null,
-  chainId: null
+  chainId: null,
+  contract: null
 };
 
 function web3Reducer(state, action) {
@@ -16,6 +17,7 @@ function web3Reducer(state, action) {
         web3Provider: action.web3Provider,
         address: action.address,
         chainId: action.chainId,
+        contract: action.contract,
         web3Loading: false,
       }
     case 'SET_ADDRESS':

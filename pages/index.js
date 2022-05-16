@@ -8,7 +8,7 @@ import Web3Context from "../context/web3/Web3Context";
 import UserContext from "../context/user/UserContext";
 
 const App = () => {
-  const {web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, chainId } = useContext(Web3Context);
+  const {web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
   const {userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
 
   const connectHandler = async (e) => {
@@ -38,7 +38,7 @@ const App = () => {
   }, [provider, disconnect])
 
   const createUserHandler = async(e) => {
-    createUser(address, chainId)
+    createUser(address, contract)
   }
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const App = () => {
           disconnectHandler={disconnectHandler}
           userExists={userExists}
           userLoading={userLoading}
-          createAccountHandler={createUserHandler}
+          createUserHandler={createUserHandler}
         />)
       }
     </>

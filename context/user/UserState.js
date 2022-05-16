@@ -37,9 +37,15 @@ const EmailState = (props) => {
 
 	const clearMessages = () => dispatch({ type: 'CLEAR_MESSAGES' });
 
-	const createUser = async(address, w3) => {
+	const createUser = async(address, contract) => {
 		setLoading();
-		createAccount(address, w3)
+		const newUserDetails = await createAccount(address, contract);
+		dispatch({
+			type: 'NEW_USER',
+			loggedInUser: newUserDetails.address,
+			keyCID: newUserDetails.keyCID,
+			keys: newUserDetails.keys
+		});
 	}	
 
 	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });

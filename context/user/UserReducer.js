@@ -51,6 +51,15 @@ export default function UserReducer(state, action) {
 				userExists: false,
 				userLoading: false
 			}
+		case 'NEW_USER':
+			return {
+				...state,
+				userExists: true,
+				userLoading: false,
+				loggedInUser: action.loggedInUser,
+				keyCID: action.keyCID,
+				keys: action.keys
+			}
 		case 'SET_LOADING':
 			return {
 				...state,

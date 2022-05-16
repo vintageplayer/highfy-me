@@ -14,7 +14,7 @@ const CustomButton = ({children, isLoading, onClick}) => (
   </Button>
 );
 
-export default function SignIn ({web3Loading, web3Provider, connectHandler, disconnectHandler, createAccountHandler, userExists, userLoading}) {
+export default function SignIn ({web3Loading, web3Provider, connectHandler, disconnectHandler, createUserHandler, userExists, userLoading}) {
 	return (
 		<div>
 	      <main>
@@ -30,7 +30,7 @@ export default function SignIn ({web3Loading, web3Provider, connectHandler, disc
 		          </CustomButton>
 		        )}
 		        { (web3Provider && !web3Loading && !userLoading && !userExists) &&
-		          <CustomButton isLoading={web3Loading || userLoading} mr={3} onClick={createAccountHandler}> 
+		          <CustomButton isLoading={web3Loading || userLoading} mr={3} onClick={createUserHandler}> 
 		        	Create Account
 		          </CustomButton>
 		        }

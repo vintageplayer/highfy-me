@@ -7,7 +7,7 @@ export const generateKeyPair = async (passphrase) => {
         type: 'rsa', // Type of the key
         rsaBits: 4096, // RSA key size (defaults to 4096 bits)
         userIDs: [{ name: 'Jon Smith', email: 'jon@example.com' }], // you can pass multiple user IDs
-        passphrase: 'super long and hard to guess secret'// protects the private key
+        passphrase: passphrase// protects the private key
     });
 };
 
