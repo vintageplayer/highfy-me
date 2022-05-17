@@ -1,6 +1,7 @@
 import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from './web3StorageUtils'
 import {encryptMessage, decryptMessage, encryptUsingWallet, decryptUsingWallet, generateKeyPair} from './encryptionUtils'
 import Web3 from "web3";
+import axios from 'axios';
 
 
 const getUserKeyCID = async (address) => {
@@ -68,9 +69,14 @@ const emitCreateAccount = async (address, keyCID, contract) => {
 	console.log(txHash);
 }
 
-export const emitSendMail = async (from, to, dataCID, contract) => {
-	const txHash = await contract.methods.sendMail(to, dataCID).send({from: from});
-	console.log(txHash);
+export const emitSendMail = async (from, calldata, signature, contractAddress) => {
+	const payload = JSON.stringify({'from': from, 'to': contractAddress, 'data': calldata, 'signature': signature});
+	
+	const res = await axios.post('/api/mail/emitMailToRelayer', payload, {headers: {
+		'Content-type': 'application/json'
+	}})
+	
+	console.log(res);
 }
 
 export const getMails = async(mailItems, keys, type) => {
@@ -118,6 +124,7 @@ export const createAccount = async (address, contract) => {
 }
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
+	console.log('prepareing mail file')
 	const receiver = mailObject['to'];
 
 	const receiverPublicKey = await fetchPublicKey(receiver);
@@ -128,11 +135,38 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
 	const receiverDataFile = makeFileObject(receiverData, 'inbox');
 
-
 	const senderData = await encryptMail(mailObject, senderPublicKey);
 	const senderDataFile = makeFileObject(senderData, 'sent');
 
-	const dataCID = await storeFilesOnIPFS([receiverDataFile, senderDataFile])
+	const res = await axios({
+		method: "POST",
+		url: "/api/web3storage/storeFilesOnIPFS",
+		data: JSON.stringify({'receiverData':receiverData, 'senderData':senderData}),
+	});
+	const dataCID = res.data.dataCID;
+
 	console.log(dataCID);
 	return dataCID;	
+}
+
+export const prepareEmitMailParams = async (from, to, dataCID, web3Provider) => {
+	let calldata = web3Provider.eth.abi.encodeFunctionCall({
+		    name: 'sendMail',
+		    type: 'function',
+		    inputs: [{
+		        type: 'address',
+		        name: 'from'
+		    },{
+		        type: 'address',
+		        name: 'to'
+		    },,{
+		        type: 'string',
+		        name: 'dataCID'
+		    }]
+		}, [from, to, dataCID]);
+
+	let hash = web3Provider.utils.soliditySha3(calldata);// sign the hash.
+	let signature = await web3Provider.eth.sign(hash, from);
+	
+	return { calldata, signature };
 }

@@ -4,7 +4,7 @@ export default function EmailRow({message, messageIndex, messageClickHandler}) {
 
 	const name = message ? message['from'] : '';
 	const subject = message ? message['subject'] : '';
-	const body = message ? message['body'].substr(0, 75) : '';
+	const body = message ? message['body']?.substr(0, 75) : '';
 	
 	return (
 		<Flex
