@@ -72,11 +72,8 @@ const EmailState = (props) => {
 
 	const sendMail = async (mailObject, contract, web3Provider) => {
 		const receiver = mailObject['to'];
-		console.log('preparing mail file');
 		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
-		console.log('preparing emit email params file');
 		const { calldata, signature } = await prepareEmitMailParams(mailObject['from'], mailObject['to'], dataCID, web3Provider);
-		console.log('emiting email')
 		await emitSendMail(state.loggedInUser, calldata, signature, contract._address)
 	}
 
