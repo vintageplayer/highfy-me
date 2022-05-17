@@ -17,6 +17,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/core";
 import {useContext} from 'react';
+import {sendMail} from '../../utils/mailUtils'
+import Web3Context from "../../context/web3/Web3Context";
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
