@@ -7,8 +7,8 @@ import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main ({address}) {
-	const {userLoading ,loggedInUser, activeList, setActiveList} = useContext(UserContext);
-	const {contract} = useContext(Web3Context);
+	const {userLoading ,loggedInUser, activeList, setActiveList, sendMail } = useContext(UserContext);
+	const {contract, web3Provider} = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
 		const listId = e.target.id;
@@ -30,7 +30,7 @@ export default function Main ({address}) {
 	      <List>
 	        {/* Send Model */}
 	        <ListItem p='0.5rem 1rem 1rem'>
-	          <SendModel loggedInUser={loggedInUser} contract={contract} />
+	          <SendModel loggedInUser={loggedInUser} contract={contract} sendMail={sendMail} web3Provider={web3Provider} />
 	        </ListItem>
 
 	        {/* Labels Buttons */}

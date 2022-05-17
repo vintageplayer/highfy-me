@@ -16,9 +16,9 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/core";
-import {sendMail} from '../../utils/mailUtils'
+import {useContext} from 'react';
 
-const SendModel = ({loggedInUser, contract}) => {
+const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -31,7 +31,7 @@ const SendModel = ({loggedInUser, contract}) => {
 
     const mailObject = {
       to: receiver,
-      from: loggedInUser,
+      from: props.loggedInUser,
       subject: subject,
       body: mailBody
     }
@@ -45,7 +45,7 @@ const SendModel = ({loggedInUser, contract}) => {
         isClosable: true,
       });
       onClose();
-      await sendMail(mailObject, contract);
+      await props.sendMail(mailObject, props.contract, props.web3Provider);
     } catch {
       toast({
         title: "An error occurred.",

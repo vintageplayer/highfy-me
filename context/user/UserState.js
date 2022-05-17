@@ -1,7 +1,7 @@
 import UserContext from "./UserContext";
 import {useReducer} from 'react';
 import UserReducer, {initialState} from "./UserReducer";
-import {createAccount, getUserDetails, fetchKeys, getMails} from '../../utils/mailUtils'
+import {createAccount, getUserDetails, fetchKeys, getMails, prepareMailFile, emitSendMail} from '../../utils/mailUtils'
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -70,6 +70,12 @@ const EmailState = (props) => {
 
 	const setLoading = () => dispatch({ type: 'SET_LOADING' });
 
+	const sendMail = async (mailObject, contract, web3Provider) => {
+		const receiver = mailObject['to'];
+		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
+		await emitSendMail(state.loggedInUser, receiver, dataCID, contract)
+	}
+
 	return (
 		<UserContext.Provider
 			value={{
@@ -84,7 +90,8 @@ const EmailState = (props) => {
 				createUser: createUser,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
-				getMessages: getMessages
+				getMessages: getMessages,
+				sendMail: sendMail
 			}}
 		>
 			{props.children}

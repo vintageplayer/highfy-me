@@ -68,7 +68,7 @@ const emitCreateAccount = async (address, keyCID, contract) => {
 	console.log(txHash);
 }
 
-const emitSendMail = async (from, to, dataCID, contract) => {
+export const emitSendMail = async (from, to, dataCID, contract) => {
 	const txHash = await contract.methods.sendMail(to, dataCID).send({from: from});
 	console.log(txHash);
 }
@@ -117,7 +117,7 @@ export const createAccount = async (address, contract) => {
 	return result;
 }
 
-export const sendMail = async (mailObject, contract) => {
+export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiver = mailObject['to'];
 
 	const receiverPublicKey = await fetchPublicKey(receiver);
@@ -128,18 +128,11 @@ export const sendMail = async (mailObject, contract) => {
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
 	const receiverDataFile = makeFileObject(receiverData, 'inbox');
 
-	const sender = mailObject['from'];
-	const senderPublicKey = await fetchPublicKey(sender);
-	if (!senderPublicKey) {
-		alert(`Account for ${receiver} not found!!`);
-		return;
-	}
+
 	const senderData = await encryptMail(mailObject, senderPublicKey);
 	const senderDataFile = makeFileObject(senderData, 'sent');
 
-
 	const dataCID = await storeFilesOnIPFS([receiverDataFile, senderDataFile])
 	console.log(dataCID);
-	await emitSendMail(sender, receiver, dataCID, contract);
 	return dataCID;	
 }
