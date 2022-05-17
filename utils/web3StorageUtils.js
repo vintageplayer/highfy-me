@@ -1,5 +1,5 @@
 import { Web3Storage, File } from 'web3.storage'
-import Blob from 'cross-blob';
+
 
 export function getAccessToken () {
   // In a real app, it's better to read an access token from an
@@ -14,8 +14,8 @@ function makeStorageClient () {
 }
 
 export function makeFileObject (payload, filename) {
-  const blob = new Blob([payload], { type: 'application/json' })
-  return new File([blob], filename)
+  const buffer = Buffer.from(payload)
+  return new File([buffer], filename)
 }
 
 async function storeFiles (files) {

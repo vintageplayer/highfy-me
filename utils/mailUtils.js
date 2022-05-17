@@ -1,49 +1,48 @@
-import {storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile} from './web3StorageUtils'
-import {encryptMessage, decryptMessage, encryptUsingWallet, decryptUsingWallet, generateKeyPair} from './encryptionUtils'
+import { storeDataOnIPFS, makeFileObject, storeFilesOnIPFS, retrieveFile } from "./web3StorageUtils";
+import { encryptMessage, decryptMessage, encryptUsingWallet, decryptUsingWallet, generateKeyPair } from "./encryptionUtils";
 import Web3 from "web3";
-import axios from 'axios';
-
+import axios from "axios";
 
 const getUserKeyCID = async (address) => {
 	const keyEndpoint = `api/userKey/${address.toLowerCase()}`;
 	const userKeyResponse = await fetch(keyEndpoint);
 	if (userKeyResponse.status == 200) {
 		const userKeyResponseJson = await userKeyResponse.json();
-		if (userKeyResponseJson['data']['account']) {
-			const cid = userKeyResponseJson['data']['account']['keyCID'];
+		if (userKeyResponseJson["data"]["account"]) {
+			const cid = userKeyResponseJson["data"]["account"]["keyCID"];
 			return cid;
 		}
 	}
-}
+};
 
 export const getUserDetails = async (address) => {
 	const detailsEndpoint = `api/userDetails/${address.toLowerCase()}`;
 	const userDetailsResponse = await fetch(detailsEndpoint);
 	if (userDetailsResponse.status == 200) {
 		const userDetailsResponseJson = await userDetailsResponse.json();
-			return  userDetailsResponseJson
+		return userDetailsResponseJson;
 	}
-}
+};
 
 export const fetchKeys = async (address, cid) => {
 	// Given CID, fetch the file
-	const keyFileData = await retrieveFile(cid, 'web3_mail_info', 'blob');
+	const keyFileData = await retrieveFile(cid, "web3_mail_info", "blob");
 	const encryptedKeyData = `0x${keyFileData}`;
 
 	// Decrypt the Contents with web3 wallet
 	const keyData = await decryptUsingWallet(encryptedKeyData, address);
 	return keyData;
-}
+};
 
 const fetchPublicKey = async (address) => {
 	// For the entered reciver's address, query the public key cid
 	const cid = await getUserKeyCID(address);
 	if (!cid) {
-		return
+		return;
 	}
-	const publicKeyData = await retrieveFile(cid, 'web3_mail_pkey');
-	return publicKeyData['publicKey'];
-}
+	const publicKeyData = await retrieveFile(cid, "web3_mail_pkey");
+	return publicKeyData["publicKey"];
+};
 
 const encryptMail = async (mailObject, publicKey) => {
 	// given message and public key, encrypt the data
@@ -52,73 +51,112 @@ const encryptMail = async (mailObject, publicKey) => {
 
 	// Return the encrypted data
 	return encrypted;
-}
+};
 
 export const decryptMail = async (encryptedMail, userKeys) => {
 	// Keys should be fetched once per login and stored somewhere
 	try {
-		const mailData = await decryptMessage(encryptedMail, userKeys['privateKey'], userKeys['passphrase']);
+		const mailData = await decryptMessage(encryptedMail, userKeys["privateKey"], userKeys["passphrase"]);
 		return mailData;
 	} catch {
 		return {};
-	}	
-}
+	}
+};
 
-const emitCreateAccount = async (address, keyCID, contract) => {
-	const txHash = await contract.methods.createAccount(keyCID).send({from: address});
-	console.log(txHash);
-}
+export const emitToRelayer = async (from, calldata, signature, contractAddress) => {
+	const payload = JSON.stringify({
+		from: from,
+		to: contractAddress,
+		data: calldata,
+		signature: signature,
+	});
 
-export const emitSendMail = async (from, calldata, signature, contractAddress) => {
-	const payload = JSON.stringify({'from': from, 'to': contractAddress, 'data': calldata, 'signature': signature});
-	
-	const res = await axios.post('/api/mail/emitMailToRelayer', payload, {headers: {
-		'Content-type': 'application/json'
-	}})
-}
+	const res = await axios.post("/api/relayer/sendToRelayer", payload, {
+		headers: {
+			"Content-type": "application/json",
+		},
+	});
+};
 
-export const getMails = async(mailItems, keys, type) => {
-	return await Promise.all(mailItems.map(async (mailItem) => {
-		const mailFileData = await retrieveFile(mailItem['id'], type, 'blob');
-		try {
-			return {...JSON.parse(await decryptMail(mailFileData, keys)), id: mailItem['id']}
-		} catch {
-			return {}
-		}
-	}));
-}
+export const getMails = async (mailItems, keys, type) => {
+	return await Promise.all(
+		mailItems.map(async (mailItem) => {
+			const mailFileData = await retrieveFile(mailItem["id"], type, "blob");
+			try {
+				return {
+					...JSON.parse(await decryptMail(mailFileData, keys)),
+					id: mailItem["id"],
+				};
+			} catch {
+				return {};
+			}
+		})
+	);
+};
 
-export const createAccount = async (address, contract) => {
-	const passphrase = 'super long and hard to guess secret'
+export const prepareAccountFile = async (address) => {
+	const passphrase = "super long and hard to guess secret";
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
 		privateKey: privateKey,
 		publicKey: publicKey,
-		passphrase: passphrase
-	}
+		passphrase: passphrase,
+	};
 
 	// Encrypt keys & passphrase with wallet
 	const encryptedKeyData = await encryptUsingWallet(keyData, address);
 	const encryptedKeyFileName = `web3_mail_info`;
-	const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
-
 
 	// Upload Public Key to IPFS
 	const publicKeyData = JSON.stringify({
-		publicKey: publicKey
+		publicKey: publicKey,
 	});
 	const publicKeyFileName = `web3_mail_pkey`;
-	const publicKeyFile = makeFileObject(publicKeyData, publicKeyFileName);
-	const keyCID = await storeFilesOnIPFS([encryptedKeyFile, publicKeyFile])
+	const payload = JSON.stringify({
+		fileData: [
+			{ name: encryptedKeyFileName, value: encryptedKeyData },
+			{ name: publicKeyFileName, value: publicKeyData },
+		],
+	});
+	const res = await axios.post("/api/web3storage/storeFilesOnIPFS", payload, {
+		headers: {
+			"Content-type": "application/json",
+		},
+	});
 
-	// Emit Event with address, and the CID
-	await emitCreateAccount(address, keyCID, contract);
+	const keyCID = res.data.cid;
+	
 	const result = {
 		address: address,
 		keys: keyData,
-		keyCID: keyCID
+		keyCID: keyCID,
 	};
 	return result;
+};
+
+export const prepareEmitAccountParams = async (from, keyCID, web3Provider) => {
+	let calldata = web3Provider.eth.abi.encodeFunctionCall(
+		{
+			name: "createAccount",
+			type: "function",
+			inputs: [
+				{
+					type: "address",
+					name: "from",
+				},
+				{
+					type: "string",
+					name: "keyCID",
+				},
+			],
+		},
+		[from, keyCID]
+	);
+
+	let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.
+	let signature = await web3Provider.eth.sign(hash, from);
+
+	return { calldata, signature };
 }
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
@@ -129,28 +167,29 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 		alert(`Account for ${receiver} not found!!`);
 		return;
 	}
+	
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
-	const receiverDataFile = makeFileObject(receiverData, 'inbox');
-
 	const senderData = await encryptMail(mailObject, senderPublicKey);
-	const senderDataFile = makeFileObject(senderData, 'sent');
+	
+	const payload = JSON.stringify({
+		fileData: [
+			{ name: "inbox", value: receiverData },
+			{ name: "sent", value: senderData },
+		],
+	});
 
-	const payload = JSON.stringify({'receiverData':receiverData, 'senderData':senderData});
-	const res = await axios.post('/api/web3storage/storeFilesOnIPFS', payload, {headers: {
-		'Content-type': 'application/json'
-	}})
-	const dataCID = res.data.dataCID;
+	const res = await axios.post("/api/web3storage/storeFilesOnIPFS", payload, {
+		headers: {
+			"Content-type": "application/json",
+		},
+	});
+	const dataCID = res.data.cid;
 
 	console.log(dataCID);
-	return dataCID;	
-}
+	return dataCID;
+};
 
-export const prepareEmitMailParams = async (
-	from,
-	to,
-	dataCID,
-	web3Provider
-) => {
+export const prepareEmitMailParams = async (mailObject, dataCID, web3Provider) => {
 	let calldata = web3Provider.eth.abi.encodeFunctionCall(
 		{
 			name: "sendMail",
@@ -171,11 +210,11 @@ export const prepareEmitMailParams = async (
 				},
 			],
 		},
-		[from, to, dataCID]
+		[mailObject['from'], mailObject['to'], dataCID]
 	);
 
 	let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.
-	let signature = await web3Provider.eth.sign(hash, from);
+	let signature = await web3Provider.eth.sign(hash, mailObject['from']);
 
 	return { calldata, signature };
 };

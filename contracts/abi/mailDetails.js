@@ -200,7 +200,7 @@ export const mailContract = {
     "4": {
       "events": {},
       "links": {},
-      "address": "0x04CF013029f717E6e9Ce35c5d0196e3e883A0d63"
+      "address": "0x29e20A7f6a7087385B10EAE0614DD202ECF23FeA"
     },
     "80001": {
       "events": {},

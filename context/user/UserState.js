@@ -1,7 +1,8 @@
 import UserContext from "./UserContext";
 import {useReducer} from 'react';
 import UserReducer, {initialState} from "./UserReducer";
-import {createAccount, getUserDetails, fetchKeys, getMails, prepareMailFile, emitSendMail, prepareEmitMailParams} from '../../utils/mailUtils'
+import {prepareAccountFile, prepareEmitAccountParams,  getUserDetails, fetchKeys, getMails, prepareMailFile, emitToRelayer, prepareEmitMailParams} from '../../utils/mailUtils'
+import { mailContract } from '../../contracts/abi/mailDetails';
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -53,9 +54,12 @@ const EmailState = (props) => {
 
 	const clearMessages = () => dispatch({ type: 'CLEAR_MESSAGES' });
 
-	const createUser = async(address, contract) => {
+	const createUser = async(address, web3Provider) => {
 		setLoading();
-		const newUserDetails = await createAccount(address, contract);
+		const newUserDetails = await prepareAccountFile(address);
+		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
+		await emitToRelayer(address, calldata, signature, mailDetails.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address);
+
 		dispatch({
 			type: 'NEW_USER',
 			loggedInUser: newUserDetails.address,
@@ -70,11 +74,11 @@ const EmailState = (props) => {
 
 	const setLoading = () => dispatch({ type: 'SET_LOADING' });
 
-	const sendMail = async (mailObject, contract, web3Provider) => {
+	const sendMail = async (mailObject, web3Provider) => {
 		const receiver = mailObject['to'];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
-		const { calldata, signature } = await prepareEmitMailParams(mailObject['from'], mailObject['to'], dataCID, web3Provider);
-		await emitSendMail(state.loggedInUser, calldata, signature, contract._address)
+		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
+		await emitToRelayer(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address)
 	}
 
 	return (
