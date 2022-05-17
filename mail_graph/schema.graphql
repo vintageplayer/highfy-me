@@ -1,0 +1,15 @@
+type Account @entity(immutable: true) {
+  id: ID!
+  accountAddress: Bytes! # address
+  keyCID: String! # string
+  mailsSent: [Mail!] @derivedFrom(field: "from")
+  inbox: [Mail!] @derivedFrom(field: "to")
+}
+
+type Mail @entity(immutable: true) {
+  id: ID!
+  from: Account! # address
+  to: Account! # address
+  dataCID: String! # string
+}
+

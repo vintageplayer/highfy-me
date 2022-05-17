@@ -1,0 +1,16 @@
+{
+  "name": "web3_mail",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ vintageplayer/web3_mail",
+    "create-local": "graph create --node http://localhost:8020/ vintageplayer/web3_mail",
+    "remove-local": "graph remove --node http://localhost:8020/ vintageplayer/web3_mail",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 vintageplayer/web3_mail"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.29.2",
+    "@graphprotocol/graph-ts": "0.26.0"
+  }
+}
