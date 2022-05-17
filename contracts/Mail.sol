@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.13;
 
-contract Mail {
-    address private owner;
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract Mail is Ownable {
     bool contractIsActive = true;
+    address _relayer;
 
     event AccountCreated(address accountAddress, string dataCID);
     event mailSent(address from, address to, string dataCID);
+    event relayerChanged(address relayer);
 
-    constructor() {
-        owner = msg.sender;
+    constructor(address relayer) {
+        _relayer = relayer;
+    }
+
+    function setRelayer(address relayer) public onlyOwner() {
+        _relayer = relayer;
+        emit relayerChanged(_relayer);
     }
 
     function createAccount(string calldata keyCID)
@@ -26,29 +34,28 @@ contract Mail {
         emit mailSent(msg.sender, to, dataCID);
     }
 
-    function updateOwner(address newOwner)
-    public
-    isOwner()
-    isActive()
+    function sendMail(address from, address to, string calldata dataCID)
+    public 
+    onlyRelayer()
     {
-        owner = newOwner;
+        emit mailSent(from, to, dataCID);
     }
 
     function deprecateContract()
     public
-    isOwner()
+    onlyOwner()
     isActive()
     {
         contractIsActive = false;
     }
 
-    modifier isOwner() {
-        require(msg.sender == owner, "Can only be invoked by the contract owner");
+    modifier isActive() {
+        require(contractIsActive == true, "Contract has been deprecated");
         _;
     }
 
-    modifier isActive() {
-        require(contractIsActive == true, "Contract has been deprecated");
+    modifier onlyRelayer() {
+        require(_relayer == _msgSender(), "Message should come from relayer only");
         _;
     }
 }

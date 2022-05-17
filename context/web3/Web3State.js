@@ -5,7 +5,7 @@ import Web3 from 'web3'
 import Web3Modal from 'web3modal';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import WalletLink from 'walletlink';
-import {mailContract} from './contractDetails'
+import {mailContract} from '../../contracts/abi/mailDetails'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
 
