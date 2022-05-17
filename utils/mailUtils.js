@@ -122,7 +122,6 @@ export const createAccount = async (address, contract) => {
 }
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
-	console.log('prepareing mail file')
 	const receiver = mailObject['to'];
 
 	const receiverPublicKey = await fetchPublicKey(receiver);
