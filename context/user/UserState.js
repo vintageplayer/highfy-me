@@ -66,6 +66,8 @@ const EmailState = (props) => {
 			keyCID: newUserDetails.keyCID,
 			keys: newUserDetails.keys
 		});
+
+		window.setInterval('window.location.reload();', 10000);
 	}	
 
 	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
