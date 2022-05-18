@@ -1,4 +1,7 @@
 import { useEffect, useState, useContext } from "react";
+import {
+  useToast,
+} from "@chakra-ui/core";
 
 // Import Pages
 import Main from "../components/Main";
@@ -10,6 +13,8 @@ import UserContext from "../context/user/UserContext";
 const App = () => {
   const {web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
   const {userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
+
+  const toast = useToast();
 
   const connectHandler = async (e) => {
     await connect();
@@ -38,7 +43,7 @@ const App = () => {
   }, [provider, disconnect])
 
   const createUserHandler = async(e) => {
-    createUser(address, web3Provider)
+    createUser(address, web3Provider, toast);
   }
 
   useEffect(() => {

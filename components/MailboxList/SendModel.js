@@ -16,7 +16,7 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/core";
-import {useContext} from 'react';
+import { useContext } from "react";
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -33,9 +33,9 @@ const SendModel = (props) => {
       to: receiver,
       from: props.loggedInUser,
       subject: subject,
-      body: mailBody
-    }
-    
+      body: mailBody,
+    };
+
     try {
       toast({
         title: "Processing Mail.",
@@ -45,12 +45,12 @@ const SendModel = (props) => {
         isClosable: true,
       });
       onClose();
-      await props.sendMail(mailObject, props.web3Provider);
+      let res = await props.sendMail(mailObject, props.web3Provider);
       toast({
-        title: "Message Sent.",
-        description: "Email sent through decentralised communication.",
-        status: "success",
-        duration: 15000,
+        title: res.error ? "Oops" : "Email sent",
+        description: res.message,
+        status: res.error ? "error" : "success",
+        duration: 5000,
         isClosable: true,
       });
     } catch {
@@ -61,65 +61,37 @@ const SendModel = (props) => {
         duration: 9000,
         isClosable: true,
       });
-    }        
+    }
   };
 
   return (
     <Fragment>
-      <Button
-        w='100%'
-        h='48px'
-        leftIcon={BsPlusCircle}
-        borderRadius='20px'
-        variant='solid'
-        variantColor='blue'
-        onClick={onOpen}
-      >
+      <Button w="100%" h="48px" leftIcon={BsPlusCircle} borderRadius="20px" variant="solid" variantColor="blue" onClick={onOpen}>
         New Message
       </Button>
-      <Modal
-        isOpen={isOpen}
-        size='xl'
-        onClose={onClose}
-        closeOnOverlayClick={false}
-      >
+      <Modal isOpen={isOpen} size="xl" onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>New Message</ModalHeader>
           <ModalCloseButton />
-          <form id='form' onSubmit={handleSubmit}>
+          <form id="form" onSubmit={handleSubmit}>
             <ModalBody>
               <FormControl isRequired>
-                <Input
-                  type='text'
-                  id='emailTo'
-                  placeholder='To'
-                  aria-describedby='email-helper-text'
-                />
+                <Input type="text" id="emailTo" placeholder="To" aria-describedby="email-helper-text" />
               </FormControl>
               <FormControl isRequired>
-                <Input
-                  type='text'
-                  id='subject'
-                  placeholder='Subject'
-                  aria-describedby='subject-email-helper-text'
-                />
+                <Input type="text" id="subject" placeholder="Subject" aria-describedby="subject-email-helper-text" />
               </FormControl>
               <FormControl isRequired>
-                <Textarea
-                  id='message'
-                  minH='280px'
-                  size='xl'
-                  resize='vertical'
-                />
+                <Textarea id="message" minH="280px" size="xl" resize="vertical" />
               </FormControl>
             </ModalBody>
 
             <ModalFooter>
-              <Button type='reset' variantColor='blue' mr={3} onClick={onClose}>
+              <Button type="reset" variantColor="blue" mr={3} onClick={onClose}>
                 Close
               </Button>
-              <Button type='submit' variantColor='green'>
+              <Button type="submit" variantColor="green">
                 Send
               </Button>
             </ModalFooter>

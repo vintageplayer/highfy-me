@@ -1,8 +1,17 @@
 import UserContext from "./UserContext";
-import {useReducer} from 'react';
-import UserReducer, {initialState} from "./UserReducer";
-import {prepareAccountFile, prepareEmitAccountParams,  getUserDetails, fetchKeys, getMails, prepareMailFile, emitToRelayer, prepareEmitMailParams} from '../../utils/mailUtils'
-import { mailContract } from '../../contracts/abi/mailDetails';
+import { useReducer } from "react";
+import UserReducer, { initialState } from "./UserReducer";
+import {
+	prepareAccountFile,
+	prepareEmitAccountParams,
+	getUserDetails,
+	fetchKeys,
+	getMails,
+	prepareMailFile,
+	emitToRelayer,
+	prepareEmitMailParams,
+} from "../../utils/mailUtils";
+import { mailContract } from "../../contracts/abi/mailDetails";
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -10,56 +19,78 @@ const EmailState = (props) => {
 	const loginUser = async (address) => {
 		setLoading();
 		const userDetails = await getUserDetails(address);
-		if (!userDetails['data']['account']) {
-			setUserNotFound()
-			return // User Not Found
+		if (!userDetails["data"]["account"]) {
+			setUserNotFound();
+			return; // User Not Found
 		}
-		const cid = userDetails['data']['account']['keyCID'];
+		const cid = userDetails["data"]["account"]["keyCID"];
 		const keys = JSON.parse(await fetchKeys(address, cid));
-		console.log('User Logged In');
-		const inboxCIDs= userDetails['data']['account']['inbox'];
-		const sentCIDs= userDetails['data']['account']['mailsSent'];
+		console.log("User Logged In");
+		const inboxCIDs = userDetails["data"]["account"]["inbox"];
+		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
 
 		dispatch({
-			type: 'LOGIN_USER',
+			type: "LOGIN_USER",
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: {...state.allCIDs, "INBOX": inboxCIDs, "SENT": sentCIDs}
+			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
 			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
 		});
-	}
+	};
 
 	const getMessages = async (listId) => {
-		if (listId === 'INBOX'){
-			return await getMails(state.allCIDs['INBOX'], state.userKeys, 'inbox');
-		} else if(listId === 'SENT') {
-			return await getMails(state.allCIDs['SENT'], state.userKeys, 'sent');
+		if (listId === "INBOX") {
+			return await getMails(state.allCIDs["INBOX"], state.userKeys, "inbox");
+		} else if (listId === "SENT") {
+			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
 		} else {
 			return [];
 		}
-	}
+	};
 
 	const setActiveList = async (listId) => {
 		setLoading();
 		const messages = await getMessages(listId);
 		dispatch({
-			type: 'SET_ACTIVE_LIST',
+			type: "SET_ACTIVE_LIST",
 			list: listId,
-			messages: messages
+			messages: messages,
 		});
-	} 
+	};
 
-	const setMessage = (message) => dispatch({ type: 'SET_MESSAGE', payload: message});
+	const setMessage = (message) => dispatch({ type: "SET_MESSAGE", payload: message });
 
-	const clearMessages = () => dispatch({ type: 'CLEAR_MESSAGES' });
+	const clearMessages = () => dispatch({ type: "CLEAR_MESSAGES" });
 
-	const createUser = async(address, web3Provider) => {
+	const createUser = async (address, web3Provider, toast) => {
 		setLoading();
-		const newUserDetails = await prepareAccountFile(address);
-		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
-		await emitWithTimeout(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 8000);
+		let newUserDetails;
 
+		try {
+			newUserDetails = await timeout(prepareAccountFile(address), 9000);
+		} catch (err) {
+			return { error: true, message: "Please try again , failed to upload your keys to IPFS" };
+		}
+
+		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
+
+		try {
+			await timeout(
+				emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address),
+				9000
+			);
+		} catch (err) {
+			return { error: true, message: "Transaction has been submitted to the block, please check in a few minutes" };
+		}
+
+		toast({
+			title: "Almost done.",
+			description: "Transaction has been completed, please wait 10s while we set up your account.",
+			status: "info",
+			duration: 10000,
+			isClosable: true,
+		});
 		// dispatch({
 		// 	type: 'NEW_USER',
 		// 	loggedInUser: newUserDetails.address,
@@ -67,22 +98,44 @@ const EmailState = (props) => {
 		// 	keys: newUserDetails.keys
 		// });
 
-		await new Promise(resolve => setTimeout('window.location.reload();', 8000));
+		await new Promise((resolve) => setTimeout("window.location.reload();", 10000));
+	};
 
-	}	
+	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
 
-	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
+	const resetUser = () => dispatch({ type: "RESET_USER" });
 
-	const resetUser = () => dispatch({ type: 'RESET_USER' });
-
-	const setLoading = () => dispatch({ type: 'SET_LOADING' });
+	const setLoading = () => dispatch({ type: "SET_LOADING" });
 
 	const sendMail = async (mailObject, web3Provider) => {
-		const receiver = mailObject['to'];
-		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
+		const receiver = mailObject["to"];
+		let dataCID = "";
+		try {
+			dataCID = await timeout(prepareMailFile(mailObject, state.userKeys["publicKey"]), 9000);
+		} catch (err) {
+			return { error: true, message: "Please try again , failed to upload your encrypted data to IPFS" };
+		}
 		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
-		await emitWithTimeout(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 8000)
-	}
+
+		try {
+			await timeout(
+				emitToRelayer(
+					state.loggedInUser,
+					calldata,
+					signature,
+					mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+				),
+				9000
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Transaction has been submitted to the chain , please check in some time for confirmation.",
+			};
+		}
+
+		return { error: false, message: "Mail has been submitted !" };
+	};
 
 	return (
 		<UserContext.Provider
@@ -99,15 +152,16 @@ const EmailState = (props) => {
 				setMessage: setMessage,
 				setActiveList: setActiveList,
 				getMessages: getMessages,
-				sendMail: sendMail
+				sendMail: sendMail,
 			}}
 		>
 			{props.children}
 		</UserContext.Provider>
-		)
-}
+	);
+};
 
 export default EmailState;
+
 
 function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
     return new Promise(function(resolve, reject) {
@@ -119,3 +173,7 @@ function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
         
     });
 }
+
+const timeout = async (p, ms) => Promise.race([p, new Promise((_, r) => sleep(ms).then((_) => r(Error("timeout"))))]);
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
