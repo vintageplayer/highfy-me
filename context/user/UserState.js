@@ -67,7 +67,7 @@ const EmailState = (props) => {
 		// 	keys: newUserDetails.keys
 		// });
 
-		await new Promise(resolve => setTimeout('window.location.reload();', 10000));
+		await new Promise(resolve => setTimeout('window.location.reload();', 8000));
 
 	}	
 
@@ -81,7 +81,7 @@ const EmailState = (props) => {
 		const receiver = mailObject['to'];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
 		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
-		await emitWithTimeout(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 10000)
+		await emitWithTimeout(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 8000)
 	}
 
 	return (
