@@ -45,7 +45,7 @@ const SendModel = (props) => {
         isClosable: true,
       });
       onClose();
-      let res = await props.sendMail(mailObject, props.web3Provider);
+      let res = await props.sendMail(mailObject, props.web3Provider, toast);
       toast({
         title: res.error ? "Oops" : "Email sent",
         description: res.message,

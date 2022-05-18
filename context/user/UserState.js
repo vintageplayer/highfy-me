@@ -162,18 +162,6 @@ const EmailState = (props) => {
 
 export default EmailState;
 
-
-function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
-    return new Promise(function(resolve, reject) {
-        emitToRelayer(from, calldata, signature, contractAddress).then(resolve, reject);
-        setTimeout(() => {
-        	window.alert("Transaction has been submitted to the blockchain, please refresh in 2 mins.");
-        	reject();
-        }, timeout);
-        
-    });
-}
-
 const timeout = async (p, ms) => Promise.race([p, new Promise((_, r) => sleep(ms).then((_) => r(Error("timeout"))))]);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
