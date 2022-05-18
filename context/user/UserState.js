@@ -68,6 +68,7 @@ const EmailState = (props) => {
 		// });
 
 		await new Promise(resolve => setTimeout('window.location.reload();', 10000));
+
 	}	
 
 	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
