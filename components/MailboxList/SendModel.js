@@ -41,7 +41,7 @@ const SendModel = (props) => {
         title: "Processing Mail.",
         description: "Processing your email for decentralised communication.",
         status: "info",
-        duration: 15000,
+        duration: 5000,
         isClosable: true,
       });
       onClose();
