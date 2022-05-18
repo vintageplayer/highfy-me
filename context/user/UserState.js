@@ -60,14 +60,14 @@ const EmailState = (props) => {
 		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
 		await emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address);
 
-		dispatch({
-			type: 'NEW_USER',
-			loggedInUser: newUserDetails.address,
-			keyCID: newUserDetails.keyCID,
-			keys: newUserDetails.keys
-		});
+		// dispatch({
+		// 	type: 'NEW_USER',
+		// 	loggedInUser: newUserDetails.address,
+		// 	keyCID: newUserDetails.keyCID,
+		// 	keys: newUserDetails.keys
+		// });
 
-		window.setInterval('window.location.reload();', 10000);
+		await new Promise(resolve => setTimeout('window.location.reload();', 10000));
 	}	
 
 	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
