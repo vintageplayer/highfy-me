@@ -58,7 +58,7 @@ const EmailState = (props) => {
 		setLoading();
 		const newUserDetails = await prepareAccountFile(address);
 		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
-		await emitToRelayer(address, calldata, signature, mailDetails.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address);
+		await emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address);
 
 		dispatch({
 			type: 'NEW_USER',

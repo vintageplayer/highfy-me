@@ -161,13 +161,12 @@ export const prepareEmitAccountParams = async (from, keyCID, web3Provider) => {
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiver = mailObject['to'];
-
 	const receiverPublicKey = await fetchPublicKey(receiver);
 	if (!receiverPublicKey) {
 		alert(`Account for ${receiver} not found!!`);
 		return;
 	}
-	
+
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
 	const senderData = await encryptMail(mailObject, senderPublicKey);
 	
@@ -183,6 +182,7 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 			"Content-type": "application/json",
 		},
 	});
+
 	const dataCID = res.data.cid;
 
 	console.log(dataCID);
