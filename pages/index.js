@@ -38,7 +38,7 @@ const App = () => {
   }, [provider, disconnect])
 
   const createUserHandler = async(e) => {
-    createUser(address, contract)
+    createUser(address, web3Provider)
   }
 
   useEffect(() => {
