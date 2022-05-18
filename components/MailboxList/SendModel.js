@@ -46,6 +46,13 @@ const SendModel = (props) => {
       });
       onClose();
       await props.sendMail(mailObject, props.web3Provider);
+      toast({
+        title: "Message Sent.",
+        description: "Email sent through decentralised communication.",
+        status: "success",
+        duration: 15000,
+        isClosable: true,
+      });
     } catch {
       toast({
         title: "An error occurred.",

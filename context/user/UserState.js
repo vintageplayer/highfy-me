@@ -112,7 +112,10 @@ export default EmailState;
 function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
     return new Promise(function(resolve, reject) {
         emitToRelayer(from, calldata, signature, contractAddress).then(resolve, reject);
-        setTimeout(reject, timeout);
-        window.alert("Took too long to complete the transaction , try again in a fwe minutes");
+        setTimeout(() => {
+        	window.alert("Took too long to complete the transaction , try again in a fwe minutes");
+        	reject();
+        }, timeout);
+        
     });
 }
