@@ -113,7 +113,7 @@ function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
     return new Promise(function(resolve, reject) {
         emitToRelayer(from, calldata, signature, contractAddress).then(resolve, reject);
         setTimeout(() => {
-        	window.alert("Took too long to complete the transaction , try again in a fwe minutes");
+        	window.alert("Transaction has been submitted to the blockchain, please refresh in 2 mins.");
         	reject();
         }, timeout);
         
