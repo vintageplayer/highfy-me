@@ -58,7 +58,7 @@ const EmailState = (props) => {
 		setLoading();
 		const newUserDetails = await prepareAccountFile(address);
 		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
-		await emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address);
+		await emitWithTimeout(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 10000);
 
 		// dispatch({
 		// 	type: 'NEW_USER',
@@ -81,7 +81,7 @@ const EmailState = (props) => {
 		const receiver = mailObject['to'];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
 		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
-		await emitToRelayer(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address)
+		await emitWithTimeout(state.loggedInUser, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address, 10000)
 	}
 
 	return (
@@ -108,3 +108,11 @@ const EmailState = (props) => {
 }
 
 export default EmailState;
+
+function emitWithTimeout(from, calldata, signature, contractAddress, timeout) {
+    return new Promise(function(resolve, reject) {
+        emitToRelayer(from, calldata, signature, contractAddress).then(resolve, reject);
+        setTimeout(reject, timeout);
+        window.alert("Took too long to complete the transaction , try again in a fwe minutes");
+    });
+}
