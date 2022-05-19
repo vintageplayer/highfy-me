@@ -63,7 +63,7 @@ export const decryptMail = async (encryptedMail, userKeys) => {
 	}	
 }
 
-const emitCreateAccount = async (address, keyCID, contract) => {
+export const emitCreateAccount = async (address, keyCID, contract) => {
 	const txHash = await contract.methods.createAccount(keyCID).send({from: address});
 	console.log(txHash);
 }
@@ -84,8 +84,9 @@ export const getMails = async(mailItems, keys, type) => {
 	}));
 }
 
-export const createAccount = async (address, contract) => {
+export const createAccount = async (address, updateCallback) => {
 	const passphrase = 'super long and hard to guess secret'
+	updateCallback('Generating New User Keys to encrypt/decrypt..')
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
 		privateKey: privateKey,
@@ -93,11 +94,13 @@ export const createAccount = async (address, contract) => {
 		passphrase: passphrase
 	}
 
+	updateCallback('Encrypting User Keys Using Wallet...')
 	// Encrypt keys & passphrase with wallet
 	const encryptedKeyData = await encryptUsingWallet(keyData, address);
 	const encryptedKeyFileName = `web3_mail_info`;
-	const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
 
+	updateCallback('Creating Keys to Store on IPFS...')
+	const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
 
 	// Upload Public Key to IPFS
 	const publicKeyData = JSON.stringify({
@@ -105,10 +108,9 @@ export const createAccount = async (address, contract) => {
 	});
 	const publicKeyFileName = `web3_mail_pkey`;
 	const publicKeyFile = makeFileObject(publicKeyData, publicKeyFileName);
+	updateCallback('Storing User Key on IPFS...')
 	const keyCID = await storeFilesOnIPFS([encryptedKeyFile, publicKeyFile])
-
-	// Emit Event with address, and the CID
-	await emitCreateAccount(address, keyCID, contract);
+	
 	const result = {
 		address: address,
 		keys: keyData,

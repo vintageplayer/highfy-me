@@ -8,8 +8,8 @@ import Web3Context from "../context/web3/Web3Context";
 import UserContext from "../context/user/UserContext";
 
 const App = () => {
-  const {web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
-  const {userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
+  const {web3DisplayMessage, web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
+  const {userDisplayMessage, message, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
 
   const connectHandler = async (e) => {
     await connect();
@@ -18,6 +18,10 @@ const App = () => {
   const disconnectHandler = async (e) => {  
     disconnect();
   };
+
+  const createUserHandler = async(e) => {
+    createUser(address, contract)
+  }
 
   // Auto connect to the cached provider
   useEffect(() => {
@@ -36,10 +40,6 @@ const App = () => {
       }
     }
   }, [provider, disconnect])
-
-  const createUserHandler = async(e) => {
-    createUser(address, contract)
-  }
 
   useEffect(() => {
     if (address && address!==loggedInUser) {
@@ -61,6 +61,8 @@ const App = () => {
           userExists={userExists}
           userLoading={userLoading}
           createUserHandler={createUserHandler}
+          web3DisplayMessage={web3DisplayMessage}
+          userDisplayMessage={userDisplayMessage}
         />)
       }
     </>

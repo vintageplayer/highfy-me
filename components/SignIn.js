@@ -1,4 +1,4 @@
-import { Flex, Button } from "@chakra-ui/core";
+import { Flex, Button, Text } from "@chakra-ui/core";
 
 const CustomButton = ({children, isLoading, onClick}) => (
   <Button
@@ -14,12 +14,21 @@ const CustomButton = ({children, isLoading, onClick}) => (
   </Button>
 );
 
-export default function SignIn ({web3Loading, web3Provider, connectHandler, disconnectHandler, createUserHandler, userExists, userLoading}) {
+export default function SignIn ({userDisplayMessage, web3DisplayMessage, web3Loading, web3Provider, connectHandler, disconnectHandler, createUserHandler, userExists, userLoading}) {
 	return (
 		<div>
 	      <main>
-	        <h1 className="title">Troth Me </h1>
-        	<Flex h='100vh' justify='center' alignItems='center' bg='#e5f4f1'>
+	        <h1 className="title">HighFy Me </h1>
+	        <Flex h='35vh' justify='center' alignItems='center' bg='#e5f4f1'></Flex>
+	        <Flex h='5vh' justify='center' alignItems='center' bg='#e5f4f1'>
+	        { !web3Provider ? (
+	        		<Text>{web3DisplayMessage}</Text>
+	        	) : (
+	        		<Text>{userDisplayMessage}</Text>
+	        	)
+	        }
+	        </Flex>
+        	<Flex h='15vh' justify='center' alignItems='center' bg='#e5f4f1'>
 		        {web3Provider ? (
 		          <CustomButton isLoading={userLoading} onClick={disconnectHandler}>
 		            Disconnect
@@ -35,6 +44,7 @@ export default function SignIn ({web3Loading, web3Provider, connectHandler, disc
 		          </CustomButton>
 		        }
 	        </Flex>
+	        <Flex h='45vh' justify='center' alignItems='center' bg='#e5f4f1'></Flex>
 	      </main>
 		</div>
 	);

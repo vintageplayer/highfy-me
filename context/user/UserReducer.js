@@ -8,7 +8,8 @@ export const initialState = {
 	message: null,
 	activeList: "INBOX",
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
-	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []}
+	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
+	userDisplayMessage: 'Checking Account Details'
 }
 
 export default function UserReducer(state, action) {
@@ -46,6 +47,11 @@ export default function UserReducer(state, action) {
 				messages: [],
 				message: null
 			}
+		case 'SET_USER_EXISTS':
+			return {
+				...state,
+				userExists: true
+			}
 		case 'USER_NOT_FOUND':
 			return {
 				...state,
@@ -59,12 +65,23 @@ export default function UserReducer(state, action) {
 				userLoading: false,
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
-				keys: action.keys
+				keys: action.keys,
+				userDisplayMessage: 'User Logged In'
 			}
 		case 'SET_LOADING':
 			return {
 				...state,
 				userLoading: true
+			}
+		case 'CLEAR_LOADING':
+			return {
+				...state,
+				userLoading: false
+			}
+		case 'SET_DISPLAY_MESSAGE':
+			return {
+				...state,
+				userDisplayMessage: action.payload
 			}
 		case 'RESET_USER':
 			return initialState

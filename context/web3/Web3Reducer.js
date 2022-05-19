@@ -5,7 +5,8 @@ export const initialState = {
   web3Provider: null,
   address: null,
   chainId: null,
-  contract: null
+  contract: null,
+  web3DisplayMessage: 'Connect Metamask Wallet to Login or Sign Up'
 };
 
 function web3Reducer(state, action) {
@@ -36,6 +37,11 @@ function web3Reducer(state, action) {
       return {
         ...state,
         web3Loading: true,
+      }
+    case 'SET_DISPLAY_MESSAGE':
+      return {
+        ...state,
+        web3DisplayMessage: action.payload
       }
     default:
       return state;
