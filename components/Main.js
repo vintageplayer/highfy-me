@@ -1,4 +1,4 @@
-import {useEffect, useContext} from 'react';
+import {useEffect, useContext, useRef} from 'react';
 import { Flex } from "@chakra-ui/core";
 import MailboxList from "./MailboxList/MailboxList";
 import EmailList from "./EmailList/EmailList";
@@ -6,11 +6,15 @@ import Email from "./Email/Email";
 import UserContext from "../context/user/UserContext";
 
 export default function Main ({address}) {
-	const {setActiveList, loggedInUser} = useContext(UserContext);
+	const {setActiveList, loggedInUser, refreshMessages, activeList, allCIDs, refreshUserData} = useContext(UserContext);
 
 	useEffect(() => {
 		setActiveList("INBOX");
 	}, [loggedInUser]);
+
+	useInterval( async () => {
+		await refreshUserData();
+	  }, 5000);
 	
 	return (
 	    <Flex
@@ -27,4 +31,24 @@ export default function Main ({address}) {
 	      <Email />
 	    </Flex>
 	);
+}
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  // Remember the latest function.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
 }

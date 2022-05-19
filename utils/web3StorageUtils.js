@@ -67,7 +67,7 @@ export async function storeDataOnIPFS(data, fileName) {
 
 export async function retrieveFile (cid, fileName, resType = 'json') {
   const url = makeFileUrl(cid, fileName);
-  console.log(`Fetching file: ${url}`);
+  // console.log(`Fetching file: ${url}`);
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`Error fetching IPFS File: [${res.status}] ${res.statusText}`)
