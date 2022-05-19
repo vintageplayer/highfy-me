@@ -1,11 +1,16 @@
-import { Web3Storage } from 'web3.storage'
+import { Web3Storage, File } from 'web3.storage'
+import Blob from 'cross-blob';
 
-export function getAccessToken () {
+function getAccessToken () {
+  // If you're just testing, you can paste in a token
+  // and uncomment the following line:
+  return process.env.WEB3STORAGE_ACCESS_KEY;
+
   // In a real app, it's better to read an access token from an
   // environement variable or other configuration that's kept outside of
   // your code base. For this to work, you need to set the
   // WEB3STORAGE_TOKEN environment variable before you run your code.
-  return process.env.NEXT_PUBLIC_WEB3STORAGE_TOKEN
+  // return process.env.WEB3STORAGE_TOKEN
 }
 
 function makeStorageClient () {
@@ -50,7 +55,6 @@ async function storeWithProgress (files) {
 
 function makeFileUrl(cid, fileName) {
   return `https://${cid}.ipfs.dweb.link/${fileName}`
-  // return `https://ipfs.io/ipfs/${cid}/${fileName}`;
 }
 
 export async function storeFilesOnIPFS(files) {
@@ -68,7 +72,7 @@ export async function storeDataOnIPFS(data, fileName) {
 
 export async function retrieveFile (cid, fileName, resType = 'json') {
   const url = makeFileUrl(cid, fileName);
-  // console.log(`Fetching file: ${url}`);
+  console.log(`Fetching file: ${url}`);
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`Error fetching IPFS File: [${res.status}] ${res.statusText}`)

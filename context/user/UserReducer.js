@@ -2,6 +2,7 @@ export const initialState = {
 	userExists: false,
 	userLoading: false,
 	loggedInUser: null,
+	refreshingMessages: false,
 	keyCID: null,
 	userKeys: null,
 	messages: [],
@@ -33,7 +34,8 @@ export default function UserReducer(state, action) {
 				activeList: action.list,
 				messages: action.messages,
 				message: null,
-				userLoading: false
+				userLoading: false,
+				refreshingMessages: false
 			}
 		case 'SET_MESSAGE':
 			return {
@@ -87,6 +89,22 @@ export default function UserReducer(state, action) {
 			}
 		case 'RESET_USER':
 			return initialState
+		case 'REFRESH_CID':
+			return {
+				...state,
+				allCIDs: {...state.allCIDs, INBOX: action.allCIDs['INBOX'], SENT: action.allCIDs['SENT']}
+			}
+		case 'REFRESH_MESSAGES':
+			console.log('refreshing messages', action.messages);
+			return {
+				...state,
+				messages: action.messages
+			}
+		case 'SET_REFRESHING_MESSAGES':
+			return {
+				...state,
+				refreshingMessages: action.refreshingState
+			}
 		default:
 			return state;
 	}

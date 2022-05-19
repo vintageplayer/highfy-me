@@ -29,41 +29,65 @@ const EmailState = (props) => {
 		const inboxCIDs= userDetails['data']['account']['inbox'];
 		const sentCIDs= userDetails['data']['account']['mailsSent'];
 		setDisplayMessage('User Logged In')
-		dispatch({
-			type: 'LOGIN_USER',
+
+    dispatch({
+			type: "LOGIN_USER",
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: {...state.allCIDs, "INBOX": inboxCIDs, "SENT": sentCIDs}
+			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
 			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
 		});
-	}
+	};
 
 	const getMessages = async (listId) => {
-		if (listId === 'INBOX'){
-			return await getMails(state.allCIDs['INBOX'], state.userKeys, 'inbox');
-		} else if(listId === 'SENT') {
-			return await getMails(state.allCIDs['SENT'], state.userKeys, 'sent');
+		if (listId === "INBOX") {
+			return await getMails(state.allCIDs["INBOX"], state.userKeys, "inbox");
+		} else if (listId === "SENT") {
+			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
 		} else {
 			return [];
 		}
-	}
+	};
+
+	const refreshUserData = async () => {
+		const userDetails = await getUserDetails(state.loggedInUser);
+		const inboxCIDs = userDetails["data"]["account"]["inbox"];
+		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
+		
+		dispatch({
+			type: "REFRESH_CID",
+			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
+		});
+
+		if(!state.refreshingMessages) {
+			const messages = await getMessages(state.activeList);
+			dispatch({
+				type: "REFRESH_MESSAGES",
+				messages: messages,
+			});
+
+		}
+	};
 
 	const setActiveList = async (listId) => {
 		setLoading();
+		setRefreshingMail(true);
 		const messages = await getMessages(listId);
 		dispatch({
-			type: 'SET_ACTIVE_LIST',
+			type: "SET_ACTIVE_LIST",
 			list: listId,
-			messages: messages
+			messages: messages,
 		});
-	} 
+	};
 
-	const setMessage = (message) => dispatch({ type: 'SET_MESSAGE', payload: message});
+	const setRefreshingMail = (refreshingState) => dispatch({ type: "SET_REFRESHING_MESSAGES", refreshingState })
 
-	const clearMessages = () => dispatch({ type: 'CLEAR_MESSAGES' });
+	const setMessage = (message) => dispatch({ type: "SET_MESSAGE", payload: message });
 
-	const createUser = async(address, contract) => {
+	const clearMessages = () => dispatch({ type: "CLEAR_MESSAGES" });
+
+	const createUser = async (address, contract) => {
 		setLoading();
 		setDisplayMessage('Creating User Account');
 		let newUserDetails;
@@ -88,25 +112,25 @@ const EmailState = (props) => {
 
 		setDisplayMessage('New User Account Created');
 		dispatch({
-			type: 'NEW_USER',
+			type: "NEW_USER",
 			loggedInUser: newUserDetails.address,
 			keyCID: newUserDetails.keyCID,
-			keys: newUserDetails.keys
+			keys: newUserDetails.keys,
 		});
-	}	
+	};
 
-	const setUserNotFound = () => dispatch({ type: 'USER_NOT_FOUND' });
+	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
 
 	const resetUser = () => dispatch({ type: 'RESET_USER' });	
 	const setUserExists = () => dispatch({ type: 'SET_USER_EXISTS' });
 	const setLoading = () => dispatch({ type: 'SET_LOADING' });
 	const clearLoading = () => dispatch({ type: 'CLEAR_LOADING' });
 
-	const sendMail = async (mailObject, contract, web3Provider) => {
-		const receiver = mailObject['to'];
-		const dataCID = await prepareMailFile(mailObject, state.userKeys['publicKey']);
-		await emitSendMail(state.loggedInUser, receiver, dataCID, contract)
-	}
+	const sendMail = async (mailObject, contract) => {
+		const receiver = mailObject["to"];
+		const dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
+		await emitSendMail(state.loggedInUser, receiver, dataCID, contract);
+	};
 
 	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });
 
@@ -126,12 +150,13 @@ const EmailState = (props) => {
 				setMessage: setMessage,
 				setActiveList: setActiveList,
 				getMessages: getMessages,
-				sendMail: sendMail
+				sendMail: sendMail,
+				refreshUserData: refreshUserData
 			}}
 		>
 			{props.children}
 		</UserContext.Provider>
-		)
-}
+	);
+};
 
 export default EmailState;
