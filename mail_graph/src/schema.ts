@@ -57,6 +57,15 @@ export class Account extends Entity {
   set keyCID(value: string) {
     this.set("keyCID", Value.fromString(value));
   }
+
+  get credits(): BigInt {
+    let value = this.get("credits");
+    return value!.toBigInt();
+  }
+
+  set credits(value: BigInt) {
+    this.set("credits", Value.fromBigInt(value));
+  }
 }
 
 export class MailItem extends Entity {
@@ -67,18 +76,18 @@ export class MailItem extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save Mail entity without an ID");
+    assert(id != null, "Cannot save MailItem entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type Mail must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type MailItem must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("Mail", id.toString(), this);
+      store.set("MailItem", id.toString(), this);
     }
   }
 
   static load(id: string): MailItem | null {
-    return changetype<MailItem | null>(store.get("Mail", id));
+    return changetype<MailItem | null>(store.get("MailItem", id));
   }
 
   get id(): string {
@@ -94,7 +103,7 @@ export class MailItem extends Entity {
     return Account.load(this.get("from"));
   }
 
-  set from(value: Account) {    
+  set from(value: Account) {
     this.set("from", value.get('id')!);
   }
 
@@ -113,5 +122,71 @@ export class MailItem extends Entity {
 
   set dataCID(value: string) {
     this.set("dataCID", Value.fromString(value));
+  }
+
+  get receiverLabel(): string {
+    let value = this.get("receiverLabel");
+    return value!.toString();
+  }
+
+  set receiverLabel(value: string) {
+    this.set("receiverLabel", Value.fromString(value));
+  }
+}
+
+export class ReceiverLabel extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save ReceiverLabel entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type ReceiverLabel must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("ReceiverLabel", id.toString(), this);
+    }
+  }
+
+  static load(id: string): ReceiverLabel | null {
+    return changetype<ReceiverLabel | null>(store.get("ReceiverLabel", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get from(): Account {
+    return Account.load(this.get("from"));
+  }
+
+  set from(value: Account) {
+    this.set("from", value.get('id')!);
+  }
+
+  get to(): Account {
+    return Account.load(this.get("to"));
+  }
+
+  set to(value: Account) {
+    this.set("to", value.get('id')!);
+  }
+
+  get mailLabel(): string {
+    let value = this.get("mailLabel");
+    return value!.toString();
+  }
+
+  set mailLabel(value: string) {
+    this.set("mailLabel", Value.fromString(value));
   }
 }
