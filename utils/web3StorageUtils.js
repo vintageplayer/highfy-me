@@ -50,6 +50,7 @@ async function storeWithProgress (files) {
 
 function makeFileUrl(cid, fileName) {
   return `https://${cid}.ipfs.dweb.link/${fileName}`
+  // return `https://ipfs.io/ipfs/${cid}/${fileName}`;
 }
 
 export async function storeFilesOnIPFS(files) {

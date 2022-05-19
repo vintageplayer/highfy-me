@@ -65,7 +65,9 @@ export default function UserReducer(state, action) {
 				userLoading: false,
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
-				keys: action.keys,
+				userKeys: action.keys,
+				message: null,
+				activeLabel: "INBOX",
 				userDisplayMessage: 'User Logged In'
 			}
 		case 'SET_LOADING':

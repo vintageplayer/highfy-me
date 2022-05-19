@@ -121,7 +121,6 @@ export const createAccount = async (address, updateCallback) => {
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiver = mailObject['to'];
-
 	const receiverPublicKey = await fetchPublicKey(receiver);
 	if (!receiverPublicKey) {
 		alert(`Account for ${receiver} not found!!`);
@@ -130,10 +129,8 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
 	const receiverDataFile = makeFileObject(receiverData, 'inbox');
 
-
 	const senderData = await encryptMail(mailObject, senderPublicKey);
 	const senderDataFile = makeFileObject(senderData, 'sent');
-
 	const dataCID = await storeFilesOnIPFS([receiverDataFile, senderDataFile])
 	console.log(dataCID);
 	return dataCID;	

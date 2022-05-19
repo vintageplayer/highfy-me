@@ -15,7 +15,7 @@ const EmailState = (props) => {
 			return // User Not Found
 		}
 		setUserExists()
-		setDisplayMessage('Account Found. Fetching User Keys...')
+		setDisplayMessage('Account Found. Fetching User Keys From IPFS. Could take upto 1-2 min...')
 		const cid = userDetails['data']['account']['keyCID'];
 		let keys;
 		try {
