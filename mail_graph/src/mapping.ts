@@ -1,22 +1,22 @@
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Mail, AccountCreated, mailSent } from "../generated/Mail/Mail"
+import { AccountCreated, mailSent } from "../generated/Mail/Mail"
 // import { ExampleEntity } from "../generated/schema"
-import { Account, MailItem } from "./schema"
+import { Account, MailItem, ReceiverLabel } from "./schema"
 
 export function handleAccountCreated(event: AccountCreated): void {
   // Entities can be loaded from the store using a string ID; this ID
   // needs to be unique across all entities of the same type
-  let accountEntity = Account.load(event.transaction.from.toHex());
+  let accountEntity = Account.load(event.params.accountAddress.toHex());
 
   if (!accountEntity) {
-    let accountEntity = new Account(event.transaction.from.toHex());
+    let accountEntity = new Account(event.params.accountAddress.toHex());
 
     // Entity fields can be set based on event parameters
-    accountEntity.accountAddress = event.params.accountAddress
-    accountEntity.keyCID = event.params.keyCID
-
+    accountEntity.accountAddress = event.params.accountAddress;
+    accountEntity.keyCID = event.params.dataCID;
+    // accountEntity.credits = BigInt(0) + BigInt(0);
     // Entities can be written to the store with `.save()`
-    accountEntity.save()
+    accountEntity.save();
   }
 
   // Note: If a handler doesn't require existing field values, it is faster
@@ -37,16 +37,50 @@ export function handleAccountCreated(event: AccountCreated): void {
   // None
 }
 
+export function generateRelation(from: Account , to: Account, label: string): ReceiverLabel {
+  const receiverId = to.get('id')!;
+  const senderId = from.get('id')!;
+
+  const relationId = `${receiverId}_${senderId}`;
+  let relationEntity = new ReceiverLabel(relationId);
+  relationEntity.from = from;
+  relationEntity.to = to;
+  relationEntity.mailLabel = label;
+  relationEntity.save();
+
+  return relationEntity;
+}
+export function getReceiverLabel(from: Account , to: Account): string {
+  const receiverId = to.get('id')!;
+  const senderId = from.get('id')!;
+
+  const senderRelationId = `${senderId}_${receiverId}`;
+  let senderRelationEntity = ReceiverLabel.load(senderRelationId);
+  if (!senderRelationEntity) {
+    generateRelation(to, from, "INBOX");
+  } else if (senderRelationEntity.get('mailLabel')!.toString() === 'SPAM') {
+    senderRelationEntity.mailLabel = "INBOX"
+  }
+
+  const receiverRelationId = `${receiverId}_${senderId}`;
+  let receiverRelationEntity = ReceiverLabel.load(receiverRelationId);
+  if (!receiverRelationEntity) {
+    receiverRelationEntity = generateRelation(from, to, "SPAM");
+  }
+  return receiverRelationEntity.get("mailLabel")!.toString();
+}
+
 export function handlemailSent(event: mailSent): void {
-  let email = MailItem.load(event.params.keyCID);
+  let email = MailItem.load(event.params.dataCID);
   let from = Account.load(event.params.from.toHex());
   let to = Account.load(event.params.to.toHex());
 
-  if (!email && from && to) {
-    let mailEntity = new MailItem(event.params.keyCID);
+  if (!email && from && to) {    
+    let mailEntity = new MailItem(event.params.dataCID);
     mailEntity.from = Account.load(event.params.from.toHex())!;
     mailEntity.to = Account.load(event.params.to.toHex())!;
-    mailEntity.dataCID = event.params.keyCID;
+    mailEntity.dataCID = event.params.dataCID;
+    mailEntity.receiverLabel = getReceiverLabel(from, to);
     mailEntity.save();
   }
 }
