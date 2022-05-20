@@ -117,8 +117,13 @@ export const getMails = async (mailItems, keys, type) => {
 	);
 };
 
-export const prepareAccountFile = async (address) => {
-	const passphrase = "super long and hard to guess secret";
+
+export const prepareAccountFile = async (address, updateCallback) => {
+	const passphrase = 'super long and hard to guess secret'
+	console.log('here');
+	updateCallback('Generating New User Keys to encrypt/decrypt..')
+	console.log('here1');
+
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
 		privateKey: privateKey,
@@ -126,21 +131,27 @@ export const prepareAccountFile = async (address) => {
 		passphrase: passphrase,
 	};
 
+	updateCallback('Encrypting User Keys Using Wallet...')
 	// Encrypt keys & passphrase with wallet
 	const encryptedKeyData = await encryptUsingWallet(keyData, address);
 	const encryptedKeyFileName = `web3_mail_info`;
+
+	updateCallback('Creating Keys to Store on IPFS...')
 
 	// Upload Public Key to IPFS
 	const publicKeyData = JSON.stringify({
 		publicKey: publicKey,
 	});
 	const publicKeyFileName = `web3_mail_pkey`;
+
 	const payload = JSON.stringify({
 		fileData: [
 			{ name: encryptedKeyFileName, value: encryptedKeyData },
 			{ name: publicKeyFileName, value: publicKeyData },
 		],
 	});
+
+	updateCallback('Storing User Key on IPFS...')
 	const res = await axios.post("/api/web3storage/storeFilesOnIPFS", payload, {
 		headers: {
 			"Content-type": "application/json",
@@ -148,7 +159,7 @@ export const prepareAccountFile = async (address) => {
 	});
 
 	const keyCID = res.data.cid;
-	
+
 	const result = {
 		address: address,
 		keys: keyData,
@@ -184,6 +195,7 @@ export const prepareEmitAccountParams = async (from, keyCID, web3Provider) => {
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
 	const receiver = mailObject['to'];
+	console.log('preparing Mail File', [mailObject, senderPublicKey]);
 	const receiverPublicKey = await fetchPublicKey(receiver);
 	if (!receiverPublicKey) {
 		alert(`Account for ${receiver} not found!!`);

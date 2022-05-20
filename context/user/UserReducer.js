@@ -2,13 +2,15 @@ export const initialState = {
 	userExists: false,
 	userLoading: false,
 	loggedInUser: null,
+	refreshingMessages: false,
 	keyCID: null,
 	userKeys: null,
 	messages: [],
 	message: null,
 	activeList: "INBOX",
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
-	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []}
+	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
+	userDisplayMessage: 'Checking Account Details'
 }
 
 export default function UserReducer(state, action) {
@@ -32,7 +34,8 @@ export default function UserReducer(state, action) {
 				activeList: action.list,
 				messages: action.messages,
 				message: null,
-				userLoading: false
+				userLoading: false,
+				refreshingMessages: false
 			}
 		case 'SET_MESSAGE':
 			return {
@@ -45,6 +48,11 @@ export default function UserReducer(state, action) {
 				...state,
 				messages: [],
 				message: null
+			}
+		case 'SET_USER_EXISTS':
+			return {
+				...state,
+				userExists: true
 			}
 		case 'USER_NOT_FOUND':
 			return {
@@ -59,15 +67,44 @@ export default function UserReducer(state, action) {
 				userLoading: false,
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
-				keys: action.keys
+				userKeys: action.keys,
+				message: null,
+				activeLabel: "INBOX",
+				userDisplayMessage: 'User Logged In'
 			}
 		case 'SET_LOADING':
 			return {
 				...state,
 				userLoading: true
 			}
+		case 'CLEAR_LOADING':
+			return {
+				...state,
+				userLoading: false
+			}
+		case 'SET_DISPLAY_MESSAGE':
+			return {
+				...state,
+				userDisplayMessage: action.payload
+			}
 		case 'RESET_USER':
 			return initialState
+		case 'REFRESH_CID':
+			return {
+				...state,
+				allCIDs: {...state.allCIDs, INBOX: action.allCIDs['INBOX'], SENT: action.allCIDs['SENT']}
+			}
+		case 'REFRESH_MESSAGES':
+			console.log('refreshing messages', action.messages);
+			return {
+				...state,
+				messages: action.messages
+			}
+		case 'SET_REFRESHING_MESSAGES':
+			return {
+				...state,
+				refreshingMessages: action.refreshingState
+			}
 		default:
 			return state;
 	}

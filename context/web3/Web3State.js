@@ -71,6 +71,7 @@ const Web3State = (props) => {
 
 	const connect = async () => {
 		setLoading();
+		setDisplayMessage('Connecting To Wallet Provider')
 		if (typeof window !== 'undefined' && !state.web3Modal) {
 			state.web3Modal = new Web3Modal({
 				network: 'mainnet', // optional
@@ -82,13 +83,17 @@ const Web3State = (props) => {
 		const provider = await state.web3Modal.connect()
 		const web3Provider = new Web3(ethereum);
 		const accounts = await web3Provider.eth.getAccounts();
+		setDisplayMessage('Fetching Account address')
 		const address = accounts[0];
 		const networkId = await web3Provider.eth.net.getId();
+		setDisplayMessage('Loading Contrat For Network')
 		const contract = await getContract(web3Provider, networkId);
 
 		provider.on('accountsChanged', handleAccountsChanged)
 		provider.on('chainChanged', handleChainChanged)
 		provider.on('disconnect', handleDisconnect)
+
+		setDisplayMessage('Wallet Connected Successfully')
 
 		dispatch({
 		  type: 'SET_WEB3_PROVIDER',
@@ -97,7 +102,7 @@ const Web3State = (props) => {
 		  address,
 		  chainId: networkId,
 		  contract: contract
-		})
+		})		
 	};
 
 	const removeListeners = () => {
@@ -118,6 +123,8 @@ const Web3State = (props) => {
 
 	const setLoading = () => dispatch({ type: 'SET_LOADING' });
 
+	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });
+
 	return (
 		<Web3Context.Provider
 			value={{
@@ -128,6 +135,7 @@ const Web3State = (props) => {
 				chainId: state.chainId,
 				contract: state.contract,
 				web3Modal: state.web3Modal,
+				web3DisplayMessage: state.web3DisplayMessage,
 				connect,
 				disconnect
 			}}

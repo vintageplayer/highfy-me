@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Box, List, ListItem } from "@chakra-ui/core";
 import { MdLabel, MdStar, MdPeople, MdLoyalty, MdInbox } from "react-icons/md";
 import { FiSend, FiFile } from "react-icons/fi";
@@ -7,7 +7,7 @@ import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main({ address }) {
-	const { userLoading, loggedInUser, activeList, setActiveList, sendMail } = useContext(UserContext);
+	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, refreshingMessages } = useContext(UserContext);
 	const { contract, web3Provider } = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
@@ -26,7 +26,7 @@ export default function Main({ address }) {
 				</ListItem>
 
 				{/* Labels Buttons */}
-				<ListItem>
+				<ListItem disable="true">
 					<Button
 						id="INBOX"
 						w="100%"
@@ -38,6 +38,7 @@ export default function Main({ address }) {
 						variant={activeList === "INBOX" ? "solid" : "ghost"}
 						justifyContent="flex-start"
 						onClick={selectMailList}
+						isDisabled={refreshingMessages}
 					>
 						Inbox
 					</Button>
@@ -54,6 +55,7 @@ export default function Main({ address }) {
 						variant={activeList === "COLLECT" ? "solid" : "ghost"}
 						justifyContent="flex-start"
 						onClick={selectMailList}
+						isDisabled={refreshingMessages}
 					>
 						Collect
 					</Button>
@@ -70,6 +72,7 @@ export default function Main({ address }) {
 						variant={activeList === "SUBSCRIPTIONS" ? "solid" : "ghost"}
 						justifyContent="flxex-start"
 						onClick={selectMailList}
+						isDisabled={refreshingMessages}
 					>
 						Subscriptions
 					</Button>
@@ -86,6 +89,7 @@ export default function Main({ address }) {
 						variant={activeList === "SENT" ? "solid" : "ghost"}
 						justifyContent="flex-start"
 						onClick={selectMailList}
+						isDisabled={refreshingMessages}
 					>
 						Sent
 					</Button>
@@ -102,6 +106,7 @@ export default function Main({ address }) {
 						variant={activeList === "SPAM" ? "solid" : "ghost"}
 						justifyContent="flxex-start"
 						onClick={selectMailList}
+						isDisabled={refreshingMessages}
 					>
 						Spam
 					</Button>

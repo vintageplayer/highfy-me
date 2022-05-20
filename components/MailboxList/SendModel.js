@@ -16,7 +16,9 @@ import {
   useToast,
   useDisclosure,
 } from "@chakra-ui/core";
-import { useContext } from "react";
+import {useContext} from 'react';
+import {sendMail} from '../../utils/mailUtils'
+import Web3Context from "../../context/web3/Web3Context";
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,13 +39,6 @@ const SendModel = (props) => {
     };
 
     try {
-      toast({
-        title: "Processing Mail.",
-        description: "Processing your email for decentralised communication.",
-        status: "info",
-        duration: 5000,
-        isClosable: true,
-      });
       onClose();
       let res = await props.sendMail(mailObject, props.web3Provider, toast);
       toast({
