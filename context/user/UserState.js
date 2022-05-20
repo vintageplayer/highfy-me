@@ -10,6 +10,7 @@ import {
 	prepareMailFile,
 	emitToRelayer,
 	prepareEmitMailParams,
+	isTransactionComplete
 } from "../../utils/mailUtils";
 import { mailContract } from "../../contracts/abi/mailDetails";
 
@@ -66,9 +67,12 @@ const EmailState = (props) => {
 	const createUser = async (address, web3Provider, toast) => {
 		setLoading();
 		let newUserDetails;
+		let txHash = "";
+		let transactionComplete = false;
+		let res = null;
 
 		try {
-			newUserDetails = await timeout(prepareAccountFile(address), 9000);
+			newUserDetails = await prepareAccountFile(address);
 		} catch (err) {
 			return { error: true, message: "Please try again , failed to upload your keys to IPFS" };
 		}
@@ -76,29 +80,25 @@ const EmailState = (props) => {
 		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
 
 		try {
-			await timeout(
-				emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address),
-				9000
-			);
+			txHash = await emitToRelayer(address, calldata, signature, mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address)
 		} catch (err) {
 			return { error: true, message: "Transaction has been submitted to the block, please check in a few minutes" };
 		}
 
-		toast({
-			title: "Almost done.",
-			description: "Transaction has been completed, please wait 10s while we set up your account.",
-			status: "info",
-			duration: 10000,
-			isClosable: true,
-		});
-		// dispatch({
-		// 	type: 'NEW_USER',
-		// 	loggedInUser: newUserDetails.address,
-		// 	keyCID: newUserDetails.keyCID,
-		// 	keys: newUserDetails.keys
-		// });
+		console.log('Waiting for tx to complete - tx hash: '+ txHash);
 
-		await new Promise((resolve) => setTimeout("window.location.reload();", 10000));
+		while(!transactionComplete) {
+			transactionComplete = await isTransactionComplete(txHash);
+			console.log(transactionComplete);
+			await sleep(2000);
+		}
+
+		dispatch({
+			type: 'NEW_USER',
+			loggedInUser: newUserDetails.address,
+			keyCID: newUserDetails.keyCID,
+			keys: newUserDetails.keys
+		});
 	};
 
 	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
@@ -107,31 +107,65 @@ const EmailState = (props) => {
 
 	const setLoading = () => dispatch({ type: "SET_LOADING" });
 
-	const sendMail = async (mailObject, web3Provider) => {
+	const sendMail = async (mailObject, web3Provider, toast) => {
 		const receiver = mailObject["to"];
 		let dataCID = "";
-		try {
-			dataCID = await timeout(prepareMailFile(mailObject, state.userKeys["publicKey"]), 9000);
-		} catch (err) {
-			return { error: true, message: "Please try again , failed to upload your encrypted data to IPFS" };
-		}
-		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
+		let txHash = "";
+		let transactionComplete = false;
+		let res = null;
 
+		toast({
+	        title: "Processing Mail.",
+	        description: "Encrypting Mail...",
+	        status: "info",
+	        duration: 3000,
+	        isClosable: true,
+	      });
+
+		dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
+
+		toast({
+	        title: "Processing Mail.",
+	        description: "Please sign the encrypted mail...",
+	        status: "info",
+	        duration: 3000,
+	        isClosable: true,
+	      });
+		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
+		toast({
+	        title: "Processing Mail.",
+	        description: "Emiting mail to the blockchain...",
+	        status: "info",
+	        duration: 3000,
+	        isClosable: true,
+	      });
 		try {
-			await timeout(
-				emitToRelayer(
+			txHash = 
+				await emitToRelayer(
 					state.loggedInUser,
 					calldata,
 					signature,
 					mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
-				),
-				9000
-			);
+				);
 		} catch (err) {
 			return {
 				error: true,
 				message: "Transaction has been submitted to the chain , please check in some time for confirmation.",
 			};
+		}
+
+		toast({
+	        title: "Processing Mail.",
+	        description: "Transaction is being processed tx hash: "+txHash+"...",
+	        status: "info",
+	        duration: 3000,
+	        isClosable: true,
+	      });
+
+		while(!transactionComplete) {
+			transactionComplete = await isTransactionComplete(txHash);
+			console.log(transactionComplete);
+			await sleep(2000);
 		}
 
 		return { error: false, message: "Mail has been submitted !" };

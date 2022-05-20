@@ -32,6 +32,28 @@ export class AccountCreated__Params {
   }
 }
 
+export class OwnershipTransferred extends ethereum.Event {
+  get params(): OwnershipTransferred__Params {
+    return new OwnershipTransferred__Params(this);
+  }
+}
+
+export class OwnershipTransferred__Params {
+  _event: OwnershipTransferred;
+
+  constructor(event: OwnershipTransferred) {
+    this._event = event;
+  }
+
+  get previousOwner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newOwner(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+}
+
 export class mailSent extends ethereum.Event {
   get params(): mailSent__Params {
     return new mailSent__Params(this);
@@ -53,14 +75,47 @@ export class mailSent__Params {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get keyCID(): string {
+  get dataCID(): string {
     return this._event.parameters[2].value.toString();
+  }
+}
+
+export class relayerChanged extends ethereum.Event {
+  get params(): relayerChanged__Params {
+    return new relayerChanged__Params(this);
+  }
+}
+
+export class relayerChanged__Params {
+  _event: relayerChanged;
+
+  constructor(event: relayerChanged) {
+    this._event = event;
+  }
+
+  get relayer(): Address {
+    return this._event.parameters[0].value.toAddress();
   }
 }
 
 export class Mail extends ethereum.SmartContract {
   static bind(address: Address): Mail {
     return new Mail("Mail", address);
+  }
+
+  owner(): Address {
+    let result = super.call("owner", "owner():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_owner(): ethereum.CallResult<Address> {
+    let result = super.tryCall("owner", "owner():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 }
 
@@ -79,6 +134,10 @@ export class ConstructorCall__Inputs {
 
   constructor(call: ConstructorCall) {
     this._call = call;
+  }
+
+  get relayer(): Address {
+    return this._call.inputValues[0].value.toAddress();
   }
 }
 
@@ -107,8 +166,12 @@ export class CreateAccountCall__Inputs {
     this._call = call;
   }
 
+  get from(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
   get keyCID(): string {
-    return this._call.inputValues[0].value.toString();
+    return this._call.inputValues[1].value.toString();
   }
 }
 
@@ -116,6 +179,36 @@ export class CreateAccountCall__Outputs {
   _call: CreateAccountCall;
 
   constructor(call: CreateAccountCall) {
+    this._call = call;
+  }
+}
+
+export class CreateAccount1Call extends ethereum.Call {
+  get inputs(): CreateAccount1Call__Inputs {
+    return new CreateAccount1Call__Inputs(this);
+  }
+
+  get outputs(): CreateAccount1Call__Outputs {
+    return new CreateAccount1Call__Outputs(this);
+  }
+}
+
+export class CreateAccount1Call__Inputs {
+  _call: CreateAccount1Call;
+
+  constructor(call: CreateAccount1Call) {
+    this._call = call;
+  }
+
+  get keyCID(): string {
+    return this._call.inputValues[0].value.toString();
+  }
+}
+
+export class CreateAccount1Call__Outputs {
+  _call: CreateAccount1Call;
+
+  constructor(call: CreateAccount1Call) {
     this._call = call;
   }
 }
@@ -146,6 +239,32 @@ export class DeprecateContractCall__Outputs {
   }
 }
 
+export class RenounceOwnershipCall extends ethereum.Call {
+  get inputs(): RenounceOwnershipCall__Inputs {
+    return new RenounceOwnershipCall__Inputs(this);
+  }
+
+  get outputs(): RenounceOwnershipCall__Outputs {
+    return new RenounceOwnershipCall__Outputs(this);
+  }
+}
+
+export class RenounceOwnershipCall__Inputs {
+  _call: RenounceOwnershipCall;
+
+  constructor(call: RenounceOwnershipCall) {
+    this._call = call;
+  }
+}
+
+export class RenounceOwnershipCall__Outputs {
+  _call: RenounceOwnershipCall;
+
+  constructor(call: RenounceOwnershipCall) {
+    this._call = call;
+  }
+}
+
 export class SendMailCall extends ethereum.Call {
   get inputs(): SendMailCall__Inputs {
     return new SendMailCall__Inputs(this);
@@ -167,7 +286,7 @@ export class SendMailCall__Inputs {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get keyCID(): string {
+  get dataCID(): string {
     return this._call.inputValues[1].value.toString();
   }
 }
@@ -180,20 +299,88 @@ export class SendMailCall__Outputs {
   }
 }
 
-export class UpdateOwnerCall extends ethereum.Call {
-  get inputs(): UpdateOwnerCall__Inputs {
-    return new UpdateOwnerCall__Inputs(this);
+export class SendMail1Call extends ethereum.Call {
+  get inputs(): SendMail1Call__Inputs {
+    return new SendMail1Call__Inputs(this);
   }
 
-  get outputs(): UpdateOwnerCall__Outputs {
-    return new UpdateOwnerCall__Outputs(this);
+  get outputs(): SendMail1Call__Outputs {
+    return new SendMail1Call__Outputs(this);
   }
 }
 
-export class UpdateOwnerCall__Inputs {
-  _call: UpdateOwnerCall;
+export class SendMail1Call__Inputs {
+  _call: SendMail1Call;
 
-  constructor(call: UpdateOwnerCall) {
+  constructor(call: SendMail1Call) {
+    this._call = call;
+  }
+
+  get from(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get to(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get dataCID(): string {
+    return this._call.inputValues[2].value.toString();
+  }
+}
+
+export class SendMail1Call__Outputs {
+  _call: SendMail1Call;
+
+  constructor(call: SendMail1Call) {
+    this._call = call;
+  }
+}
+
+export class SetRelayerCall extends ethereum.Call {
+  get inputs(): SetRelayerCall__Inputs {
+    return new SetRelayerCall__Inputs(this);
+  }
+
+  get outputs(): SetRelayerCall__Outputs {
+    return new SetRelayerCall__Outputs(this);
+  }
+}
+
+export class SetRelayerCall__Inputs {
+  _call: SetRelayerCall;
+
+  constructor(call: SetRelayerCall) {
+    this._call = call;
+  }
+
+  get relayer(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class SetRelayerCall__Outputs {
+  _call: SetRelayerCall;
+
+  constructor(call: SetRelayerCall) {
+    this._call = call;
+  }
+}
+
+export class TransferOwnershipCall extends ethereum.Call {
+  get inputs(): TransferOwnershipCall__Inputs {
+    return new TransferOwnershipCall__Inputs(this);
+  }
+
+  get outputs(): TransferOwnershipCall__Outputs {
+    return new TransferOwnershipCall__Outputs(this);
+  }
+}
+
+export class TransferOwnershipCall__Inputs {
+  _call: TransferOwnershipCall;
+
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 
@@ -202,10 +389,10 @@ export class UpdateOwnerCall__Inputs {
   }
 }
 
-export class UpdateOwnerCall__Outputs {
-  _call: UpdateOwnerCall;
+export class TransferOwnershipCall__Outputs {
+  _call: TransferOwnershipCall;
 
-  constructor(call: UpdateOwnerCall) {
+  constructor(call: TransferOwnershipCall) {
     this._call = call;
   }
 }

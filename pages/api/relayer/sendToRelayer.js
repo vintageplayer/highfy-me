@@ -39,10 +39,12 @@ export default async function handler(req, res) {
       //signing transaction with private key
       transaction.sign(privateKey);
 
-      //sending transacton via web3js module
-      const txRes = await web3.eth.sendSignedTransaction('0x'+transaction.serialize().toString('hex'))
-      
-      res.status(200).json(JSON.stringify({'txRes': txRes}));
+      await web3.eth.sendSignedTransaction('0x'+transaction.serialize().toString('hex'))
+      .on("transactionHash", function(tx_hash) {
+        console.log('transactionHash payload', tx_hash)
+        res.status(200).json({'tx_hash': tx_hash});
+      });
+
     } catch (err) {
       console.log(err);
       res.status(400).json({"error": "please try again"});

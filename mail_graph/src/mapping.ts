@@ -38,15 +38,15 @@ export function handleAccountCreated(event: AccountCreated): void {
 }
 
 export function handlemailSent(event: mailSent): void {
-  let email = MailItem.load(event.params.keyCID);
+  let email = MailItem.load(event.params.dataCID);
   let from = Account.load(event.params.from.toHex());
   let to = Account.load(event.params.to.toHex());
 
   if (!email && from && to) {
-    let mailEntity = new MailItem(event.params.keyCID);
+    let mailEntity = new MailItem(event.params.dataCID);
     mailEntity.from = Account.load(event.params.from.toHex())!;
     mailEntity.to = Account.load(event.params.to.toHex())!;
-    mailEntity.dataCID = event.params.keyCID;
+    mailEntity.dataCID = event.params.dataCID;
     mailEntity.save();
   }
 }

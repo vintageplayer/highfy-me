@@ -76,7 +76,30 @@ export const emitToRelayer = async (from, calldata, signature, contractAddress) 
 			"Content-type": "application/json",
 		},
 	});
+
+	console.log(res);
+
+	if (!res.error){
+		return res.data.tx_hash;
+	} else {
+		return '';
+	}
 };
+
+export const isTransactionComplete = async (txHash) => {
+	if(txHash == null || txHash == "") {
+		return ""
+	}
+
+	const res = await axios.get("/api/getTransactionStatus", {params: {tx_hash: txHash}});
+	
+	if (res.data && res.data.transaction) {
+		const transaction = res.data.transaction;
+		return (transaction.blockNumber != null) ? true : false;
+	}
+
+	return "";
+}
 
 export const getMails = async (mailItems, keys, type) => {
 	return await Promise.all(
