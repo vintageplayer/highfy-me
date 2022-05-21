@@ -14,6 +14,11 @@ import {
   Textarea,
   useToast,
   useDisclosure,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper  
 } from "@chakra-ui/core";
 
 const SendModel = (props) => {
@@ -26,14 +31,16 @@ const SendModel = (props) => {
     const receiver = form.elements["emailTo"].value;
     const subject = form.elements["subject"].value;
     const mailBody = form.elements["message"].value;
+    const credits = form.elements["credits"].value;
 
     const mailObject = {
       to: receiver,
       from: props.loggedInUser,
       subject: subject,
-      body: mailBody
+      body: mailBody,
+      credits: credits
     }
-    
+
     try {
       toast({
         title: "Processing Mail.",
@@ -44,7 +51,8 @@ const SendModel = (props) => {
       });
       onClose();
       await props.sendMail(mailObject, props.contract);
-    } catch {
+    } catch (e) {
+      console.log(e);
       toast({
         title: "An error occurred.",
         description: "Unable to sent your email.",
@@ -103,6 +111,16 @@ const SendModel = (props) => {
                   size='xl'
                   resize='vertical'
                 />
+              </FormControl>
+              <FormControl>
+                <label>Enter Credits:</label>
+                <NumberInput defaultValue={0} min={0} max={5}>
+                  <NumberInputField id='credits' />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
               </FormControl>
             </ModalBody>
 

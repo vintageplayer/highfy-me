@@ -141,7 +141,7 @@ const EmailState = (props) => {
 	const sendMail = async (mailObject, contract) => {
 		const receiver = mailObject["to"];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
-		await emitSendMail(state.loggedInUser, receiver, dataCID, contract);
+		await emitSendMail(state.loggedInUser, receiver, dataCID, mailObject['credits'], contract);
 	};
 
 	const updateAddressLabel = async (fromAddress, newLabel, contract) => {

@@ -68,8 +68,8 @@ export const emitCreateAccount = async (address, keyCID, contract) => {
 	console.log(txHash);
 }
 
-export const emitSendMail = async (from, to, dataCID, contract) => {
-	const txHash = await contract.methods.sendMail(to, dataCID).send({from: from});
+export const emitSendMail = async (from, to, dataCID, credits, contract) => {
+	const txHash = await contract.methods.sendMail(to, dataCID, credits).send({from: from});
 	console.log(txHash);
 }
 
