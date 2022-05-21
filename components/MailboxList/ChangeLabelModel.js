@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { BsChatLeftText } from "react-icons/bs";
+import { MdPeople } from "react-icons/md";
 import {
   Button,
   Modal,
@@ -11,43 +11,36 @@ import {
   ModalCloseButton,
   Input,
   FormControl,
-  Textarea,
   useToast,
   useDisclosure,
+  Select
 } from "@chakra-ui/core";
 
-const SendModel = (props) => {
+const ChangeLabelModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
-    const receiver = form.elements["emailTo"].value;
-    const subject = form.elements["subject"].value;
-    const mailBody = form.elements["message"].value;
-
-    const mailObject = {
-      to: receiver,
-      from: props.loggedInUser,
-      subject: subject,
-      body: mailBody
-    }
-    
+    const fromAddress = form.elements["fromAddress"].value;
+    const addressLabel = form.elements["addressLabel"].value;
+    console.log(props);
     try {
       toast({
-        title: "Processing Mail.",
-        description: "Processing your email for decentralised communication.",
+        title: "Processing Label Change.",
+        description: "Submitting your address preference to blockchain.",
         status: "info",
         duration: 3000,
         isClosable: true,
       });
       onClose();
-      await props.sendMail(mailObject, props.contract);
-    } catch {
+      await props.updateAddressLabel(fromAddress, addressLabel, props.contract);
+    } catch (e) {
+      console.log(e);
       toast({
         title: "An error occurred.",
-        description: "Unable to sent your email.",
+        description: "Unable to update the label.",
         status: "error",
         duration: 9000,
         isClosable: true,
@@ -60,13 +53,13 @@ const SendModel = (props) => {
       <Button
         w='100%'
         h='48px'
-        leftIcon={BsChatLeftText}
+        leftIcon={MdPeople}
         borderRadius='20px'
         variant='solid'
         variantColor='blue'
         onClick={onOpen}
       >
-        New Message
+        Manage Addresses
       </Button>
       <Modal
         isOpen={isOpen}
@@ -76,33 +69,24 @@ const SendModel = (props) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>New Message</ModalHeader>
+          <ModalHeader>Update Address Category</ModalHeader>
           <ModalCloseButton />
           <form id='form' onSubmit={handleSubmit}>
             <ModalBody>
               <FormControl isRequired>
                 <Input
                   type='text'
-                  id='emailTo'
-                  placeholder='To'
-                  aria-describedby='email-helper-text'
+                  id='fromAddress'
+                  placeholder='Address'
+                  aria-describedby='address-helper-text'
                 />
               </FormControl>
               <FormControl isRequired>
-                <Input
-                  type='text'
-                  id='subject'
-                  placeholder='Subject'
-                  aria-describedby='subject-email-helper-text'
-                />
-              </FormControl>
-              <FormControl isRequired>
-                <Textarea
-                  id='message'
-                  minH='280px'
-                  size='xl'
-                  resize='vertical'
-                />
+                <Select id='addressLabel'>
+                  <option value='Inbox'>Inbox</option>
+                  <option value='Spam'>Spam</option>
+                  <option value='Subscription'>Subscription</option>
+                </Select>
               </FormControl>
             </ModalBody>
 
@@ -111,7 +95,7 @@ const SendModel = (props) => {
                 Close
               </Button>
               <Button type='submit' variantColor='green'>
-                Send
+                Update
               </Button>
             </ModalFooter>
           </form>
@@ -121,4 +105,4 @@ const SendModel = (props) => {
   );
 };
 
-export default SendModel;
+export default ChangeLabelModel;

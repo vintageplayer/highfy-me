@@ -73,6 +73,11 @@ export const emitSendMail = async (from, to, dataCID, contract) => {
 	console.log(txHash);
 }
 
+export const emitChangeLabel = async (from, label, contract) => {
+	const txHash = await contract.methods.modifySenderLabel(from, label).send({from: from});
+	console.log(txHash);
+}
+
 export const getMails = async(mailItems, keys, type) => {
 	return await Promise.all(mailItems.map(async (mailItem) => {
 		const mailFileData = await retrieveFile(mailItem['id'], type, 'blob');

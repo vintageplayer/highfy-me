@@ -1,5 +1,5 @@
 export const executeGraphQuery = async (queryString) => {
-  return await fetch(`https://api.thegraph.com/subgraphs/name/vintageplayer/web3_mail` ,{
+  return await fetch(`https://api.thegraph.com/subgraphs/name/vintageplayer/highfy-me` ,{
     method: 'POST',
     headers: {
       "Content-Type": "application/json"

@@ -1,7 +1,16 @@
 import UserContext from "./UserContext";
 import {useReducer} from 'react';
 import UserReducer, {initialState} from "./UserReducer";
-import {createAccount, getUserDetails, fetchKeys, getMails, prepareMailFile, emitCreateAccount, emitSendMail} from '../../utils/mailUtils'
+import {
+	createAccount,
+	getUserDetails,
+	fetchKeys,
+	getMails,
+	prepareMailFile,
+	emitCreateAccount,
+	emitSendMail,
+	emitChangeLabel
+} from '../../utils/mailUtils'
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -52,6 +61,9 @@ const EmailState = (props) => {
 
 	const refreshUserData = async () => {
 		const userDetails = await getUserDetails(state.loggedInUser);
+		if (!userDetails['data']['account']) {
+			return;
+		}
 		const inboxCIDs = userDetails["data"]["account"]["inbox"];
 		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
 		
@@ -132,6 +144,10 @@ const EmailState = (props) => {
 		await emitSendMail(state.loggedInUser, receiver, dataCID, contract);
 	};
 
+	const updateAddressLabel = async (fromAddress, newLabel, contract) => {
+		await emitChangeLabel(fromAddress, newLabel, contract);
+	};
+
 	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });
 
 	return (
@@ -151,7 +167,8 @@ const EmailState = (props) => {
 				setActiveList: setActiveList,
 				getMessages: getMessages,
 				sendMail: sendMail,
-				refreshUserData: refreshUserData
+				refreshUserData: refreshUserData,
+				updateAddressLabel: updateAddressLabel
 			}}
 		>
 			{props.children}
