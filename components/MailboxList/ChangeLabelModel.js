@@ -83,9 +83,9 @@ const ChangeLabelModel = (props) => {
               </FormControl>
               <FormControl isRequired>
                 <Select id='addressLabel'>
-                  <option value='Inbox'>Inbox</option>
-                  <option value='Spam'>Spam</option>
-                  <option value='Subscription'>Subscription</option>
+                  <option value='INBOX'>Inbox</option>
+                  <option value='SPAM'>Spam</option>
+                  <option value='SUBSCRIPTION'>Subscription</option>
                 </Select>
               </FormControl>
             </ModalBody>
