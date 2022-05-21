@@ -51,6 +51,13 @@ const SendModel = (props) => {
       });
       onClose();
       await props.sendMail(mailObject, props.contract);
+      toast({
+        title: "Mail Sent.",
+        description: "Message Accepted by blockchain.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (e) {
       console.log(e);
       toast({
