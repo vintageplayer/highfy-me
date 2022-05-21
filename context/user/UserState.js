@@ -9,7 +9,8 @@ import {
 	prepareMailFile,
 	emitCreateAccount,
 	emitSendMail,
-	emitChangeLabel
+	emitChangeLabel,
+	emitMailAction
 } from '../../utils/mailUtils'
 
 const EmailState = (props) => {
@@ -145,7 +146,13 @@ const EmailState = (props) => {
 	};
 
 	const updateAddressLabel = async (fromAddress, newLabel, contract) => {
-		await emitChangeLabel(fromAddress, newLabel, contract);
+		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
+	};
+
+	const takeActionOnMail = async (mailObject, action, contract) => {
+		const from = mailObject['from']
+		const dataCID = mailObject['id']
+		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
 
 	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });

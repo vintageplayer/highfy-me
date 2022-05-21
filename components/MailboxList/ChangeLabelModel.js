@@ -25,7 +25,7 @@ const ChangeLabelModel = (props) => {
     const form = e.target;
     const fromAddress = form.elements["fromAddress"].value;
     const addressLabel = form.elements["addressLabel"].value;
-    console.log(props);
+    
     try {
       toast({
         title: "Processing Label Change.",
@@ -36,6 +36,13 @@ const ChangeLabelModel = (props) => {
       });
       onClose();
       await props.updateAddressLabel(fromAddress, addressLabel, props.contract);
+      toast({
+        title: "Update Completed.",
+        description: "Preference Caputured on Chain.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (e) {
       console.log(e);
       toast({
