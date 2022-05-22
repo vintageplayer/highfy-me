@@ -78,6 +78,7 @@ const EmailState = (props) => {
 			if (state.messageCache[messageId]) {
 				return state.messageCache[messageId]
 			} else {
+				try {
 				const messageData = await getMail(message, state.userKeys, fileLabel);
 				// Update Message Cachce
 				dispatch({
@@ -86,6 +87,10 @@ const EmailState = (props) => {
 					messageData: messageData,
 				});
 				return messageData;
+				} catch (e) {
+					console.log(e);
+					return message;
+				}
 			}
 		}));
 		return messages;
