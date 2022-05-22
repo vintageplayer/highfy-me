@@ -1,4 +1,5 @@
 import '../styles/globals.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 // Import Context
 import Web3State from "../context/web3/Web3State";
 import UserState from "../context/user/UserState";

@@ -5,12 +5,14 @@ export const initialState = {
 	refreshingMessages: false,
 	keyCID: null,
 	userKeys: null,
+	userCredits: 0,
 	messages: [],
 	message: null,
 	activeList: "INBOX",
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
-	userDisplayMessage: 'Checking Account Details'
+	userDisplayMessage: 'Checking Account Details',
+	messageCache: {}
 }
 
 export default function UserReducer(state, action) {
@@ -23,10 +25,10 @@ export default function UserReducer(state, action) {
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
 				userKeys: action.keys,
+				userCredits: action.credits,
 				message: null,
 				activeLabel: "INBOX",
 				allCIDs: action.allCIDs
-				// allMails: action.allMails
 			}
 		case 'SET_ACTIVE_LIST':
 			return {
@@ -92,13 +94,21 @@ export default function UserReducer(state, action) {
 		case 'REFRESH_CID':
 			return {
 				...state,
-				allCIDs: {...state.allCIDs, INBOX: action.allCIDs['INBOX'], SENT: action.allCIDs['SENT']}
+				allCIDs: {...action.allCIDs},
+				userCredits: action.credits
 			}
 		case 'REFRESH_MESSAGES':
 			console.log('refreshing messages', action.messages);
 			return {
 				...state,
 				messages: action.messages
+			}
+		case 'CACHE_MESSAGE':
+			let newCache = {...state.messageCache};
+			newCache[action.messageId] = action.messageData;
+			return {
+				...state,
+				messageCache: {...newCache}
 			}
 		case 'SET_REFRESHING_MESSAGES':
 			return {

@@ -1,14 +1,16 @@
 import { useContext, useEffect, useState } from "react";
-import { Button, Box, List, ListItem } from "@chakra-ui/core";
-import { MdLabel, MdStar, MdPeople, MdLoyalty, MdInbox } from "react-icons/md";
+import { Button, Box, List, ListItem, Flex } from "@chakra-ui/core";
+import { MdLabel, MdLoyalty, MdInbox } from "react-icons/md";
 import { FiSend, FiFile } from "react-icons/fi";
+import { BsCurrencyDollar, BsCollection } from "react-icons/bs";
 import SendModel from "./SendModel";
+import ChangeLabelModel from "./ChangeLabelModel";
 import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main({ address }) {
-	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, refreshingMessages } = useContext(UserContext);
-	const { contract, web3Provider } = useContext(Web3Context);
+	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, updateAddressLabel, refreshingMessages } = useContext(UserContext);
+	const { contract } = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
 		const listId = e.target.id;
@@ -22,7 +24,11 @@ export default function Main({ address }) {
 			<List>
 				{/* Send Model */}
 				<ListItem p="0.5rem 1rem 1rem">
-					<SendModel loggedInUser={loggedInUser} contract={contract} sendMail={sendMail} web3Provider={web3Provider} />
+					<SendModel
+						loggedInUser={loggedInUser}
+						contract={contract}
+						sendMail={sendMail}
+					/>
 				</ListItem>
 
 				{/* Labels Buttons */}
@@ -50,7 +56,7 @@ export default function Main({ address }) {
 						h="45px"
 						py={2}
 						pl={8}
-						leftIcon={MdStar}
+						leftIcon={BsCurrencyDollar}
 						variantColor="blue"
 						variant={activeList === "COLLECT" ? "solid" : "ghost"}
 						justifyContent="flex-start"
@@ -67,7 +73,7 @@ export default function Main({ address }) {
 						h="45px"
 						py={2}
 						pl={8}
-						leftIcon={MdPeople}
+						leftIcon={BsCollection}
 						variantColor="blue"
 						variant={activeList === "SUBSCRIPTIONS" ? "solid" : "ghost"}
 						justifyContent="flxex-start"
@@ -110,6 +116,14 @@ export default function Main({ address }) {
 					>
 						Spam
 					</Button>
+				</ListItem>
+				{/* Manage Address Label */}
+				<ListItem p="0.5rem 1rem 1rem">
+					<ChangeLabelModel
+						loggedInUser={loggedInUser}
+						contract={contract}
+						updateAddressLabel={updateAddressLabel}
+					/>
 				</ListItem>
 			</List>
 		</Box>

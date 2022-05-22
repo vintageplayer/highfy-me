@@ -1,33 +1,17 @@
 import UserContext from "./UserContext";
-import { useReducer } from "react";
-import UserReducer, { initialState } from "./UserReducer";
+import {useReducer} from 'react';
+import UserReducer, {initialState} from "./UserReducer";
 import {
-	prepareAccountFile,
-	prepareEmitAccountParams,
+	createAccount,
 	getUserDetails,
 	fetchKeys,
-	getMails,
+	getMail,
 	prepareMailFile,
-	emitToRelayer,
-	prepareEmitMailParams,
-	isTransactionComplete,
-} from "../../utils/mailUtils";
-import { mailContract } from "../../contracts/abi/mailDetails";
-
-// Get items that only occur in the left array,
-// using the compareFunction to determine equality.
-const onlyInLeft = (left, right, compareFunction) => {
-  
-  return left.filter(leftValue =>
-    !right.some(rightValue => 
-      compareFunction(leftValue, rightValue)));
-}
-
-// A comparer used to determine if two entries are equal.
-const isSameCID = (a, b) => {
-	return a.id == b.id;
-}
-
+	emitCreateAccount,
+	emitSendMail,
+	emitChangeLabel,
+	emitMailAction
+} from '../../utils/mailUtils'
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -52,39 +36,76 @@ const EmailState = (props) => {
 			clearLoading();
 			return;
 		}
-		console.log("User Logged In");
-		const inboxCIDs = userDetails["data"]["account"]["inbox"];
-		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
-		setDisplayMessage("User Logged In");
+		console.log('User Logged In');
+
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+
+		const credits = userDetails['data']['account']['credits'];
+		setDisplayMessage('User Logged In');
 
 		dispatch({
 			type: "LOGIN_USER",
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
-			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
+			credits: credits,
+			allCIDs: { ...allCIDs }			
 		});
 	};
 
-	const getMessages = async (listId, allCIDs, isRefresh) => {
-		let newerMails = []
-		
-		if (listId != "") {
-			if (!isRefresh) return await getMails(state.allCIDs[listId], state.userKeys, listId);
-			newerMails = onlyInLeft(allCIDs[listId], state.allCIDs[listId], isSameCID);
-			if (newerMails == null) return [];
-			return await getMails(newerMails, state.userKeys, listId.toLowerCase());
-		} else {
-			return [];
+	const groupCIDByList = (userAccount) => {
+		let allCIDs = {
+			"INBOX":[],
+			"COLLECT":[],
+			"SUBSCRIPTIONS": [],
+			"SENT": [...userAccount['mailsSent']],
+			"SPAM": []
+		};
+
+		userAccount['inbox'].forEach( (message) => {
+			allCIDs[message.receiverLabel].push({...message})
+		});
+		return allCIDs;
+	}
+
+	const getMessages = async (listId) => {
+		const messageCIDs = [...state.allCIDs[listId]];
+		let fileLabel = 'inbox';
+		if (listId === "SENT") {
+			fileLabel = 'sent';
 		}
+		let messages = await Promise.all(messageCIDs.map( async (message) => {
+			const messageId = message['id'];
+			if (state.messageCache[messageId]) {
+				return state.messageCache[messageId]
+			} else {
+				const messageData = await getMail(message, state.userKeys, fileLabel);
+				// Update Message Cachce
+				dispatch({
+					type: 'CACHE_MESSAGE',
+					messageId: messageId,
+					messageData: messageData,
+				});
+				return messageData;
+			}
+		}));
+		return messages;
 	};
 
 	const refreshUserData = async () => {
 		const userDetails = await getUserDetails(state.loggedInUser);
-		const inboxCIDs = userDetails["data"]["account"]["inbox"];
-		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
-		const latestCIDlist = { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs }
+		if (!userDetails['data']['account']) {
+			return;
+		}
+
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+		const credits = userDetails['data']['account']['credits'];
+
+		dispatch({
+			type: "REFRESH_CID",
+			allCIDs: { ...allCIDs },
+			credits: credits
+		});
 
 		if (!state.refreshingMessages) {
 			const messages = await getMessages(state.activeList, latestCIDlist, true);
@@ -103,7 +124,8 @@ const EmailState = (props) => {
 	const setActiveList = async (listId) => {
 		setLoading();
 		setRefreshingMail(true);
-		const messages = await getMessages(listId, state.allCIDs, false);
+		const messages = await getMessages(listId);
+		console.log(messages);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -166,7 +188,7 @@ const EmailState = (props) => {
 		});
 	};
 
-	const sendMail = async (mailObject, web3Provider, toast) => {
+	const sendMailGasless = async (mailObject, web3Provider, toast) => {
 		const receiver = mailObject["to"];
 		let dataCID = "";
 		let txHash = "";
@@ -235,6 +257,22 @@ const EmailState = (props) => {
 		}
 
 		return { error: false, message: "Mail has been submitted !" };
+	}
+
+	const sendMail = async (mailObject, contract) => {
+		const receiver = mailObject["to"];
+		const dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
+		await emitSendMail(state.loggedInUser, receiver, dataCID, mailObject['credits'], contract);
+	};
+
+	const updateAddressLabel = async (fromAddress, newLabel, contract) => {
+		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
+	};
+
+	const handleActionOnMail = async (message, action, contract) => {
+		const from = message['from']['accountAddress']
+		const dataCID = message['dataCID']
+		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
 
 	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
@@ -252,6 +290,7 @@ const EmailState = (props) => {
 				userExists: state.userExists,
 				userLoading: state.userLoading,
 				loggedInUser: state.loggedInUser,
+				userCredits: state.userCredits,
 				activeList: state.activeList,
 				messages: state.messages,
 				message: state.message,
@@ -261,9 +300,10 @@ const EmailState = (props) => {
 				createUser: createUser,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
-				getMessages: getMessages,
 				sendMail: sendMail,
 				refreshUserData: refreshUserData,
+				updateAddressLabel: updateAddressLabel,
+				handleActionOnMail: handleActionOnMail
 			}}
 		>
 			{props.children}

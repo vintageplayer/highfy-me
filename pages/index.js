@@ -4,25 +4,14 @@ import { useToast } from "@chakra-ui/core";
 // Import Pages
 import Main from "../components/Main";
 import SignIn from "../components/SignIn";
+import NavigationBar from "../components/NavigationBar";
 
 import Web3Context from "../context/web3/Web3Context";
 import UserContext from "../context/user/UserContext";
 
 const App = () => {
-  const {
-    web3DisplayMessage,
-    web3Loading,
-    address,
-    web3Provider,
-    connect,
-    disconnect,
-    web3Modal,
-    provider,
-    removeListeners,
-    contract,
-  } = useContext(Web3Context);
-  const { userDisplayMessage, message, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser } =
-    useContext(UserContext);
+  const {web3DisplayMessage, web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
+  const {userDisplayMessage, message, userCredits, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
 
   const connectHandler = async (e) => {
     await connect();
@@ -63,10 +52,17 @@ const App = () => {
 
   return (
     <>
-      {address && loggedInUser == address ? (
-        <Main address={address} />
-      ) : (
-        <SignIn
+      { (address && loggedInUser == address) ?  (
+        <>
+          <NavigationBar
+            disconnectHandler={disconnectHandler}
+            address={address}
+            credits={userCredits}
+          />
+          <Main address={address} />
+        </>
+      ) : 
+        (<SignIn
           web3Loading={web3Loading}
           web3Provider={web3Provider}
           connectHandler={connectHandler}

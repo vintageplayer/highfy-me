@@ -18,7 +18,7 @@ export default function Main ({address}) {
 	
 	return (
 	    <Flex
-	      h='100vh'
+	      h='95vh'
 	      minH='600px'
 	      justify='space-arround'
 	      wrap='no-wrap'

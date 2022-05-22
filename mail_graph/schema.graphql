@@ -2,14 +2,28 @@ type Account @entity(immutable: true) {
   id: ID!
   accountAddress: Bytes! # address
   keyCID: String! # string
-  mailsSent: [Mail!] @derivedFrom(field: "from")
-  inbox: [Mail!] @derivedFrom(field: "to")
+  mailsSent: [MailItem!] @derivedFrom(field: "from")
+  inbox: [MailItem!] @derivedFrom(field: "to")
+  credits: BigInt @default(value: 0)
 }
 
-type Mail @entity(immutable: true) {
+type MailItem @entity(immutable: true) {
   id: ID!
   from: Account! # address
   to: Account! # address
   dataCID: String! # string
+  receiverLabel: String! # current-default or explicitly set
 }
 
+enum ReceivedMailLabels {
+  INBOX
+  SUBSCRIPTION
+  SPAM
+}
+
+type ReceiverLabel @entity {
+  id: ID!
+  from: Account!
+  to: Account!
+  mailLabel: ReceivedMailLabels!
+}
