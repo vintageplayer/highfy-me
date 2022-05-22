@@ -4,10 +4,10 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ lazycoder1/dev_email",
-    "create-local": "graph create --node http://localhost:8020/ lazycoder1/dev_email",
-    "remove-local": "graph remove --node http://localhost:8020/ lazycoder1/dev_email",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 lazycoder1/dev_email"
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ vintageplayer/web3_mail",
+    "create-local": "graph create --node http://localhost:8020/ vintageplayer/web3_mail",
+    "remove-local": "graph remove --node http://localhost:8020/ vintageplayer/web3_mail",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 vintageplayer/web3_mail"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.29.2",
