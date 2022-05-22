@@ -139,23 +139,28 @@ export default function Email() {
 				(<>
 					<hr />
 					<br />
-					<Flex justify='right' wrap='no-wrap' mb={2}>
-						<form id='form' onSubmit={mainActionHandler}>
-							<Stack isInline="true">
-								<FormControl>
-									<Select id="mailAction">
-										<option value='ACCEPT_MAIL'>Collect & Whitelist</option>
-										<option value='REFUND_MAIL'>Refund & Whitelist</option>
-										<option value='SPAM_MAIL'>Collect & Mark Spam</option>
-									</Select>
-								</FormControl>
-								<FormControl>
-									<Button type='submit' variantColor='green'>
-										Submit
-									</Button>
-								</FormControl>
-							</Stack>
-						</form>
+					<Flex justify='space-between' wrap='no-wrap'>
+						<Flex justify='right' wrap='no-wrap' mb={2}>
+							<FormLabel>Credits: {message['credits']}</FormLabel>
+						</Flex>
+						<Flex justify='right' wrap='no-wrap' mb={2}>
+							<form id='form' onSubmit={mainActionHandler}>
+								<Stack isInline="true">
+									<FormControl>
+										<Select id="mailAction">
+											<option value='ACCEPT_MAIL'>Collect & Whitelist</option>
+											<option value='REFUND_MAIL'>Refund & Whitelist</option>
+											<option value='SPAM_MAIL'>Collect & Mark Spam</option>
+										</Select>
+									</FormControl>
+									<FormControl>
+										<Button type='submit' variantColor='green'>
+											Submit
+										</Button>
+									</FormControl>
+								</Stack>
+							</form>
+						</Flex>
 					</Flex>
 				</>)}
 			</>
