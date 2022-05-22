@@ -57,14 +57,13 @@ const EmailState = (props) => {
 			"INBOX":[],
 			"COLLECT":[],
 			"SUBSCRIPTIONS": [],
-			"SENT": userAccount['mailsSent'],
+			"SENT": [...userAccount['mailsSent']],
 			"SPAM": []
 		};
 
 		userAccount['inbox'].forEach( (message) => {
-			allCIDs[message.receiverLabel].push(message)
+			allCIDs[message.receiverLabel].push({...message})
 		});
-
 		return allCIDs;
 	}
 
@@ -86,7 +85,7 @@ const EmailState = (props) => {
 
 		dispatch({
 			type: "REFRESH_CID",
-			allCIDs: { allCIDs },
+			allCIDs: { ...allCIDs },
 		});
 
 		if(!state.refreshingMessages) {
