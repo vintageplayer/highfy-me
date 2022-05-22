@@ -6,7 +6,7 @@ export const initialState = {
   address: null,
   chainId: null,
   contract: null,
-  web3DisplayMessage: 'Connect Metamask Wallet to Login or Sign Up'
+  web3DisplayMessage: 'Connect Wallet to Login or Sign Up'
 };
 
 function web3Reducer(state, action) {
