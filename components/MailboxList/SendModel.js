@@ -43,14 +43,14 @@ const SendModel = (props) => {
 
     try {
       onClose();
-      let res = await props.sendMail(mailObject, props.web3Provider, toast);
-      toast({
-        title: res.error ? "Oops" : "Email sent",
-        description: res.message,
-        status: res.error ? "error" : "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      // let res = await props.sendMail(mailObject, props.web3Provider, toast);
+      // toast({
+      //   title: res.error ? "Oops" : "Email sent",
+      //   description: res.message,
+      //   status: res.error ? "error" : "success",
+      //   duration: 5000,
+      //   isClosable: true,
+      // });
       onClose();
       await props.sendMail(mailObject, props.contract);
       toast({

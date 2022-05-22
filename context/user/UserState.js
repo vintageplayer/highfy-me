@@ -107,18 +107,14 @@ const EmailState = (props) => {
 			credits: credits
 		});
 
-		if (!state.refreshingMessages) {
-			const messages = await getMessages(state.activeList, latestCIDlist, true);
+		if(!state.refreshingMessages) {
+			const messages = await getMessages(state.activeList);
 			dispatch({
 				type: "REFRESH_MESSAGES",
-				messages: [...state.messages,...messages],
+				messages: messages,
 			});
-		}
 
-		dispatch({
-			type: "REFRESH_CID",
-			allCIDs: latestCIDlist,
-		});
+		}
 	};
 
 	const setActiveList = async (listId) => {
@@ -139,7 +135,39 @@ const EmailState = (props) => {
 
 	const clearMessages = () => dispatch({ type: "CLEAR_MESSAGES" });
 
-	const createUser = async (address, web3Provider) => {
+	const createUser = async (address, contract) => {
+		setLoading();
+		setDisplayMessage('Creating User Account');
+		let newUserDetails;
+		try {
+			newUserDetails = await createAccount(address, setDisplayMessage);
+		} catch (e) {
+			setDisplayMessage('Error Creating Account. Please re-try..')
+			clearLoading();
+			return;
+		}
+
+		setDisplayMessage('Storing New User Details on Blockchain..')
+		try {
+			await emitCreateAccount(newUserDetails.address, newUserDetails.keyCID, contract);
+		} catch (e) {
+			console.log(e);
+			// Emit Event with address, and the CID	
+			setDisplayMessage('Error Confirming Txn in Blockchain. Please check for success in 2 mins or retry.')
+			clearLoading();
+			return;
+		}
+
+		setDisplayMessage('New User Account Created');
+		dispatch({
+			type: "NEW_USER",
+			loggedInUser: newUserDetails.address,
+			keyCID: newUserDetails.keyCID,
+			keys: newUserDetails.keys,
+		});
+	};
+
+	const createUserGasless = async (address, web3Provider) => {
 		setLoading();
 		setDisplayMessage("Creating User Account");
 		let newUserDetails;

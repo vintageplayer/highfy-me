@@ -79,53 +79,53 @@ export const emitToRelayer = async (from, calldata, signature, contractAddress) 
 
 	console.log(res);
 
-	if (!res.error){
+	if (!res.error) {
 		return res.data.tx_hash;
 	} else {
-		return '';
+		return "";
 	}
 };
 
 export const isTransactionComplete = async (txHash) => {
-	if(txHash == null || txHash == "") {
-		return ""
+	if (txHash == null || txHash == "") {
+		return "";
 	}
 
-	const res = await axios.get("/api/getTransactionStatus", {params: {tx_hash: txHash}});
-	
+	const res = await axios.get("/api/getTransactionStatus", { params: { tx_hash: txHash } });
+
 	if (res.data && res.data.transaction) {
 		const transaction = res.data.transaction;
-		return (transaction.blockNumber != null) ? true : false;
+		return transaction.blockNumber != null ? true : false;
 	}
 
 	return "";
-
-}
+};
 
 export const emitSendMail = async (from, to, dataCID, credits, contract) => {
-	const txHash = await contract.methods.sendMail(to, dataCID, credits).send({from: from});
+	console.log('why not here')
+	const txHash = await contract.methods.sendMail(to, dataCID, credits).send({ from: from });
 	console.log(txHash);
-}
+};
 
 export const emitChangeLabel = async (from, to, label, contract) => {
-	console.log()
-	const txHash = await contract.methods.modifySenderLabel(from, label).send({from: to});
+	console.log();
+	const txHash = await contract.methods.modifySenderLabel(from, label).send({ from: to });
 	console.log(txHash);
-}
+};
 
 export const emitMailAction = async (from, to, dataCID, action, contract) => {
-	const txHash = await contract.methods.mailAction(from, dataCID, action).send({from: to});
+	const txHash = await contract.methods.mailAction(from, dataCID, action).send({ from: to });
 	console.log(txHash);
-}
+};
 
-export const getMail = async(mailItem, keys, type) => {
-	const mailFileData = await retrieveFile(mailItem['dataCID'], type, 'blob');
+export const getMail = async (mailItem, keys, type) => {
+	const mailFileData = await retrieveFile(mailItem["dataCID"], type, "blob");
 	try {
-		return {...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys))}
+		return { ...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys)) };
 	} catch {
-		return {...mailItem, mailObject: {}}
+		return { ...mailItem, mailObject: {} };
 	}
-}
+};
 
 export const getMails = async (mailItems, keys, type) => {
 	return await Promise.all(
@@ -143,12 +143,11 @@ export const getMails = async (mailItems, keys, type) => {
 	);
 };
 
-
 export const prepareAccountFile = async (address, updateCallback) => {
-	const passphrase = 'super long and hard to guess secret'
-	console.log('here');
-	updateCallback('Generating New User Keys to encrypt/decrypt..')
-	console.log('here1');
+	const passphrase = "super long and hard to guess secret";
+	console.log("here");
+	updateCallback("Generating New User Keys to encrypt/decrypt..");
+	console.log("here1");
 
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
@@ -157,12 +156,12 @@ export const prepareAccountFile = async (address, updateCallback) => {
 		passphrase: passphrase,
 	};
 
-	updateCallback('Encrypting User Keys Using Wallet...')
+	updateCallback("Encrypting User Keys Using Wallet...");
 	// Encrypt keys & passphrase with wallet
 	const encryptedKeyData = await encryptUsingWallet(keyData, address);
 	const encryptedKeyFileName = `web3_mail_info`;
 
-	updateCallback('Creating Keys to Store on IPFS...')
+	updateCallback("Creating Keys to Store on IPFS...");
 
 	// Upload Public Key to IPFS
 	const publicKeyData = JSON.stringify({
@@ -177,7 +176,7 @@ export const prepareAccountFile = async (address, updateCallback) => {
 		],
 	});
 
-	updateCallback('Storing User Key on IPFS...')
+	updateCallback("Storing User Key on IPFS...");
 	const res = await axios.post("/api/web3storage/storeFilesOnIPFS", payload, {
 		headers: {
 			"Content-type": "application/json",
@@ -193,6 +192,47 @@ export const prepareAccountFile = async (address, updateCallback) => {
 	};
 	return result;
 };
+
+export const createAccount = async (address, updateCallback) => {
+	const passphrase = "super long and hard to guess secret";
+	updateCallback("Generating New User Keys to encrypt/decrypt..");
+	const { privateKey, publicKey } = await generateKeyPair(passphrase);
+	const keyData = {
+		privateKey: privateKey,
+		publicKey: publicKey,
+		passphrase: passphrase,
+	};
+	console.log('wtf')
+	updateCallback("Encrypting User Keys Using Wallet...");
+	// Encrypt keys & passphrase with wallet
+	console.log('hereeee -- ',keyData, address);
+	const encryptedKeyData = await encryptUsingWallet(keyData, address);
+	const encryptedKeyFileName = `web3_mail_info`;
+	console.log('her1')
+	updateCallback("Creating Keys to Store on IPFS...");
+	const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
+
+	// Upload Public Key to IPFS
+	const publicKeyData = JSON.stringify({
+		publicKey: publicKey,
+	});
+	const publicKeyFileName = `web3_mail_pkey`;
+	const publicKeyFile = makeFileObject(publicKeyData, publicKeyFileName);
+	updateCallback("Storing User Key on IPFS...");
+	const keyCID = await storeFilesOnIPFS([encryptedKeyFile, publicKeyFile], true);
+
+	const result = {
+		address: address,
+		keys: keyData,
+		keyCID: keyCID,
+	};
+	return result;
+};
+
+export const emitCreateAccount = async (address, keyCID, contract) => {
+	const txHash = await contract.methods.createAccount(keyCID).send({from: address});
+	console.log(txHash);
+}
 
 export const prepareEmitAccountParams = async (from, keyCID, web3Provider) => {
 	let calldata = web3Provider.eth.abi.encodeFunctionCall(
@@ -217,11 +257,11 @@ export const prepareEmitAccountParams = async (from, keyCID, web3Provider) => {
 	let signature = await web3Provider.eth.sign(hash, from);
 
 	return { calldata, signature };
-}
+};
 
 export const prepareMailFile = async (mailObject, senderPublicKey) => {
-	const receiver = mailObject['to'];
-	console.log('preparing Mail File', [mailObject, senderPublicKey]);
+	const receiver = mailObject["to"];
+	console.log("preparing Mail File", [mailObject, senderPublicKey]);
 	const receiverPublicKey = await fetchPublicKey(receiver);
 	if (!receiverPublicKey) {
 		alert(`Account for ${receiver} not found!!`);
@@ -230,7 +270,7 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 
 	const receiverData = await encryptMail(mailObject, receiverPublicKey);
 	const senderData = await encryptMail(mailObject, senderPublicKey);
-	
+
 	const payload = JSON.stringify({
 		fileData: [
 			{ name: "inbox", value: receiverData },
@@ -271,11 +311,11 @@ export const prepareEmitMailParams = async (mailObject, dataCID, web3Provider) =
 				},
 			],
 		},
-		[mailObject['from'], mailObject['to'], dataCID]
+		[mailObject["from"], mailObject["to"], dataCID]
 	);
 
 	let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.
-	let signature = await web3Provider.eth.sign(hash, mailObject['from']);
+	let signature = await web3Provider.eth.sign(hash, mailObject["from"]);
 
 	return { calldata, signature };
 };

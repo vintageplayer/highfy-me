@@ -9,8 +9,22 @@ export function getAccessToken () {
   return process.env.WEB3STORAGE_TOKEN
 }
 
-function makeStorageClient () {
-  return new Web3Storage({ token: getAccessToken() })
+export function getAccessTokenClient () {
+  // In a real app, it's better to read an access token from an
+  // environement variable or other configuration that's kept outside of
+  // your code base. For this to work, you need to set the
+  // WEB3STORAGE_TOKEN environment variable before you run your code.
+  return process.env.NEXT_PUBLIC_WEB3STORAGE_TOKEN
+}
+
+function makeStorageClient (isClient) {
+  console.log('here')
+  if (isClient) {
+    return new Web3Storage({ token: getAccessTokenClient() })
+  } else {
+    return new Web3Storage({ token: getAccessToken() })
+  }
+  
 }
 
 export function makeFileObject (payload, filename) {
@@ -18,14 +32,15 @@ export function makeFileObject (payload, filename) {
   return new File([buffer], filename)
 }
 
-async function storeFiles (files) {
-  const client = makeStorageClient()
+async function storeFiles (files, isClient) {
+  const client = makeStorageClient(isClient)
   const cid = await client.put(files)
   console.log('stored files with cid:', cid)
   return cid
 }
 
-async function storeWithProgress (files) {
+async function storeWithProgress (files, isClient) {
+  console.log('here2', isClient);
   // show the root cid as soon as it's ready
   const onRootCidReady = cid => {
     console.log('uploading files with cid:', cid)
@@ -42,7 +57,8 @@ async function storeWithProgress (files) {
   }
 
   // makeStorageClient returns an authorized Web3.Storage client instance
-  const client = makeStorageClient()
+  console.log('here3', isClient);
+  const client = makeStorageClient(isClient)
 
   // client.put will invoke our callbacks during the upload
   // and return the root cid when the upload completes
@@ -54,15 +70,16 @@ function makeFileUrl(cid, fileName) {
   // return `https://ipfs.io/ipfs/${cid}/${fileName}`;
 }
 
-export async function storeFilesOnIPFS(files) {
-  const fileCID = await storeWithProgress(files);
+export async function storeFilesOnIPFS(files, isClient) {
+  console.log('here1', isClient);
+  const fileCID = await storeWithProgress(files, isClient);
   // console.log(fileCID);
   return fileCID;
 }
 
-export async function storeDataOnIPFS(data, fileName) {
+export async function storeDataOnIPFS(data, fileName, isClient) {
   const fileObject = makeFileObject(data, fileName);
-  const fileCID = await storeWithProgress([fileObject]);
+  const fileCID = await storeWithProgress([fileObject], isClient);
   // console.log(fileCID);
   return fileCID;
 }
