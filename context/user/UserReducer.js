@@ -93,7 +93,8 @@ export default function UserReducer(state, action) {
 		case 'REFRESH_CID':
 			return {
 				...state,
-				allCIDs: {...state.allCIDs, INBOX: action.allCIDs['INBOX'], SENT: action.allCIDs['SENT']}
+				allCIDs: {...action.allCIDs},
+				userCredits: action.credits
 			}
 		case 'REFRESH_MESSAGES':
 			console.log('refreshing messages', action.messages);
