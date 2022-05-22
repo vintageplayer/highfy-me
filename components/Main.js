@@ -14,7 +14,7 @@ export default function Main ({address}) {
 
 	useInterval( async () => {
 		await refreshUserData();
-	  }, 10000);
+	  }, 40000);
 	
 	return (
 	    <Flex

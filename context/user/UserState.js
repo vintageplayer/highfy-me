@@ -14,6 +14,21 @@ import {
 } from "../../utils/mailUtils";
 import { mailContract } from "../../contracts/abi/mailDetails";
 
+// Get items that only occur in the left array,
+// using the compareFunction to determine equality.
+const onlyInLeft = (left, right, compareFunction) => {
+  
+  return left.filter(leftValue =>
+    !right.some(rightValue => 
+      compareFunction(leftValue, rightValue)));
+}
+
+// A comparer used to determine if two entries are equal.
+const isSameCID = (a, b) => {
+	return a.id == b.id;
+}
+
+
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
 
@@ -52,11 +67,14 @@ const EmailState = (props) => {
 		});
 	};
 
-	const getMessages = async (listId) => {
-		if (listId === "INBOX") {
-			return await getMails(state.allCIDs["INBOX"], state.userKeys, "inbox");
-		} else if (listId === "SENT") {
-			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
+	const getMessages = async (listId, allCIDs, isRefresh) => {
+		let newerMails = []
+		
+		if (listId != "") {
+			if (!isRefresh) return await getMails(state.allCIDs[listId], state.userKeys, listId);
+			newerMails = onlyInLeft(allCIDs[listId], state.allCIDs[listId], isSameCID);
+			if (newerMails == null) return [];
+			return await getMails(newerMails, state.userKeys, listId.toLowerCase());
 		} else {
 			return [];
 		}
@@ -66,25 +84,26 @@ const EmailState = (props) => {
 		const userDetails = await getUserDetails(state.loggedInUser);
 		const inboxCIDs = userDetails["data"]["account"]["inbox"];
 		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
+		const latestCIDlist = { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs }
+
+		if (!state.refreshingMessages) {
+			const messages = await getMessages(state.activeList, latestCIDlist, true);
+			dispatch({
+				type: "REFRESH_MESSAGES",
+				messages: [...state.messages,...messages],
+			});
+		}
 
 		dispatch({
 			type: "REFRESH_CID",
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
+			allCIDs: latestCIDlist,
 		});
-
-		if (!state.refreshingMessages) {
-			const messages = await getMessages(state.activeList);
-			dispatch({
-				type: "REFRESH_MESSAGES",
-				messages: messages,
-			});
-		}
 	};
 
 	const setActiveList = async (listId) => {
 		setLoading();
 		setRefreshingMail(true);
-		const messages = await getMessages(listId);
+		const messages = await getMessages(listId, state.allCIDs, false);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -135,7 +154,6 @@ const EmailState = (props) => {
 
 		while (!transactionComplete) {
 			transactionComplete = await isTransactionComplete(txHash);
-			console.log(transactionComplete);
 			await sleep(2000);
 		}
 
@@ -212,7 +230,7 @@ const EmailState = (props) => {
 				isClosable: true,
 			});
 			transactionComplete = await isTransactionComplete(txHash);
-			console.log(transactionComplete);
+			
 			await sleep(2000);
 		}
 
