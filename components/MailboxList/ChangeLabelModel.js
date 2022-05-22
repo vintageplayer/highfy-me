@@ -52,7 +52,7 @@ const ChangeLabelModel = (props) => {
         duration: 9000,
         isClosable: true,
       });
-    }        
+    }
   };
 
   return (

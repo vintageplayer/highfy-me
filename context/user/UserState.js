@@ -36,27 +36,43 @@ const EmailState = (props) => {
 			return;
 		}
 		console.log('User Logged In');
-		const inboxCIDs= userDetails['data']['account']['inbox'];
-		const sentCIDs= userDetails['data']['account']['mailsSent'];
-		setDisplayMessage('User Logged In')
 
-    dispatch({
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+
+		const credits = userDetails['data']['account']['credits'];		
+		setDisplayMessage('User Logged In');
+
+		dispatch({
 			type: "LOGIN_USER",
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
-			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
+			credits: credits,
+			allCIDs: { ...allCIDs }			
 		});
 	};
 
+	const groupCIDByList = (userAccount) => {
+		let allCIDs = {
+			"INBOX":[],
+			"COLLECT":[],
+			"SUBSCRIPTIONS": [],
+			"SENT": userAccount['mailsSent'],
+			"SPAM": []
+		};
+
+		userAccount['inbox'].forEach( (message) => {
+			allCIDs[message.receiverLabel].push(message)
+		});
+
+		return allCIDs;
+	}
+
 	const getMessages = async (listId) => {
-		if (listId === "INBOX") {
-			return await getMails(state.allCIDs["INBOX"], state.userKeys, "inbox");
-		} else if (listId === "SENT") {
+		if (listId === "SENT") {
 			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
 		} else {
-			return [];
+			return await getMails(state.allCIDs[listId], state.userKeys, "inbox");
 		}
 	};
 
@@ -65,12 +81,12 @@ const EmailState = (props) => {
 		if (!userDetails['data']['account']) {
 			return;
 		}
-		const inboxCIDs = userDetails["data"]["account"]["inbox"];
-		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
-		
+
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+
 		dispatch({
 			type: "REFRESH_CID",
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
+			allCIDs: { allCIDs },
 		});
 
 		if(!state.refreshingMessages) {
@@ -87,6 +103,7 @@ const EmailState = (props) => {
 		setLoading();
 		setRefreshingMail(true);
 		const messages = await getMessages(listId);
+		console.log(messages);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -149,9 +166,9 @@ const EmailState = (props) => {
 		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
 	};
 
-	const takeActionOnMail = async (mailObject, action, contract) => {
-		const from = mailObject['from']
-		const dataCID = mailObject['id']
+	const handleActionOnMail = async (message, action, contract) => {
+		const from = message['from']['accountAddress']
+		const dataCID = message['dataCID']
 		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
 
@@ -172,10 +189,10 @@ const EmailState = (props) => {
 				createUser: createUser,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
-				getMessages: getMessages,
 				sendMail: sendMail,
 				refreshUserData: refreshUserData,
-				updateAddressLabel: updateAddressLabel
+				updateAddressLabel: updateAddressLabel,
+				handleActionOnMail: handleActionOnMail
 			}}
 		>
 			{props.children}

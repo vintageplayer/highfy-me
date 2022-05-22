@@ -86,11 +86,11 @@ export const emitMailAction = async (from, to, dataCID, action, contract) => {
 
 export const getMails = async(mailItems, keys, type) => {
 	return await Promise.all(mailItems.map(async (mailItem) => {
-		const mailFileData = await retrieveFile(mailItem['id'], type, 'blob');
+		const mailFileData = await retrieveFile(mailItem['dataCID'], type, 'blob');
 		try {
-			return {...JSON.parse(await decryptMail(mailFileData, keys)), id: mailItem['id']}
+			return {...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys))}
 		} catch {
-			return {}
+			return {...mailItem, mailObject: {}}
 		}
 	}));
 }

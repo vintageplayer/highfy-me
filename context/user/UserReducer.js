@@ -5,6 +5,7 @@ export const initialState = {
 	refreshingMessages: false,
 	keyCID: null,
 	userKeys: null,
+	userCredits: 0,
 	messages: [],
 	message: null,
 	activeList: "INBOX",
@@ -23,10 +24,10 @@ export default function UserReducer(state, action) {
 				loggedInUser: action.loggedInUser,
 				keyCID: action.keyCID,
 				userKeys: action.keys,
+				userCredits: action.credits,
 				message: null,
 				activeLabel: "INBOX",
 				allCIDs: action.allCIDs
-				// allMails: action.allMails
 			}
 		case 'SET_ACTIVE_LIST':
 			return {
