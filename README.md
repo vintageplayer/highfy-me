@@ -31,7 +31,7 @@ Checkout [thoughts.md](https://github.com/vintageplayer/highfy-me/blob/master/th
 ### Scenarios
 1. New Message, New Sender, 0 credits: Any message from a sender not whitelisted, goes directly to spam. Any message back from the receiver goes to the sender's inbox.
 2. Attach Label: A receiver can whitelist an address to Inbox or Subscription or mark as spam. Any future messages from the address is added to the respective categoy.
-3. Collect: Any message (whether from a whitelisted address or a new address), if has credits, it's shown here. The receiver can either accept the credits and whitelist the address, refund the credits while whitelisting the address or accept the credits while marking as spam.
+3. Collect: Any message (whether from a whitelisted address or a new address), if has credits, it's shown in the collect menu. The receiver can either accept the credits and whitelist the address, refund the credits while whitelisting the address or accept the credits while marking as spam.
 
 ### Application Screenshots
 
