@@ -76,7 +76,7 @@ const EmailState = (props) => {
 		let messages = await Promise.all(messageCIDs.map( async (message) => {
 			const messageId = message['id'];
 			if (state.messageCache[messageId]) {
-				return state.messageCache[messageId]
+				return { ...message, mailObject: state.messageCache[messageId]['mailObject']}
 			} else {
 				try {
 				const messageData = await getMail(message, state.userKeys, fileLabel);
