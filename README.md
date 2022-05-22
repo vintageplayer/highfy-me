@@ -1,4 +1,14 @@
 # HighFy Me
+## Contents
+1. Introduction
+2. Features
+3. Deep-Dive:
+	- Scenarios
+	- Application Screenshots
+	- Architecture
+	- IPFS Screenshots
+4. Using it locally
+
 ## Introduction
 HighFy Me is a fully decentralized, web3 native, wallet-to-wallet messaging system.
 The motivation was to avoid the spam and missed out updates while using discord & twitter.
@@ -14,7 +24,7 @@ Note:
 1. The gasless/cross-chain features are in a separate branch, they will be deployed once the EIP-712 standards are implemented for message signing.
 2. Currently the addrCredits feature is not shown on UI to keep up with the cross-chain functionality. Credits are added separately by interacting with the contract.
 
-Checkout thoughts.md for reference and upcoming list of features.
+Checkout [thoughts.md](https://github.com/vintageplayer/highfy-me/blob/master/thoughts.md) for reference and upcoming list of features.
 
 ## Deep-Dive
 
@@ -23,7 +33,7 @@ Checkout thoughts.md for reference and upcoming list of features.
 2. Attach Label: A receiver can whitelist an address to Inbox or Subscription or mark as spam. Any future messages from the address is added to the respective categoy.
 3. Collect: Any message (whether from a whitelisted address or a new address), if has credits, it's shown here. The receiver can either accept the credits and whitelist the address, refund the credits while whitelisting the address or accept the credits while marking as spam.
 
-### Screenshots
+### Application Screenshots
 
 1. Inbox:
 ![Inbox](https://github.com/vintageplayer/highfy-me/blob/master/docs/images/SampleInbox.png?raw=true)
@@ -35,6 +45,14 @@ Checkout thoughts.md for reference and upcoming list of features.
 ![Collect](https://github.com/vintageplayer/highfy-me/blob/master/docs/images/SampleCreditsMailResponse.png?raw=true)
 
 ### Architecture
+Components:
+1. IPFS
+2. Blockchain
+3. Graph Indexer
+4. Wallet Provider
+5. Javascript Client & Server
+
+![ArchitectureImage](https://github.com/vintageplayer/highfy-me/blob/master/docs/images/HighFyMeWeb3.png?raw=true)
 
 Note: The contract code and graph indexer schema & mapping can be found [here](https://github.com/vintageplayer/highfy-me-graph).
 
@@ -52,16 +70,17 @@ Note: The contract code and graph indexer schema & mapping can be found [here](h
 ![EncryptedMessageOnIPFS](https://github.com/vintageplayer/highfy-me/blob/master/docs/images/MessageSample.png?raw=true)
 
 
+## Using It Locally
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Using It Locally
+### Getting Started
 
-First, run the development server:
+First install dependencies & run the development server:
 
 ```bash
-npm run dev
+npm install && npm run dev
 # or
-yarn dev
+yarn install && yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -72,7 +91,7 @@ You can start editing the page by modifying `pages/index.js`. The page auto-upda
 
 The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-## Learn More
+### Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
@@ -81,7 +100,7 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+### Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
