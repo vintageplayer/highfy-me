@@ -4,7 +4,6 @@ const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/"+process.env.INFURA_ID));
 
 export default async function handler(req, res) {
-	console.log(req);
 	const payload = req.query;
 	const tx_hash = payload.tx_hash;
 	let tx = "";

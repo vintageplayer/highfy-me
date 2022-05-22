@@ -10,8 +10,12 @@ import {
 	emitCreateAccount,
 	emitSendMail,
 	emitChangeLabel,
-	emitMailAction
-} from '../../utils/mailUtils'
+	emitMailAction,
+	prepareEmitMailParams,
+	emitToRelayer,
+	isTransactionComplete
+} from '../../utils/mailUtils';
+import { mailContract } from '../../contracts/abi/mailDetails';
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -121,7 +125,6 @@ const EmailState = (props) => {
 		setLoading();
 		setRefreshingMail(true);
 		const messages = await getMessages(listId);
-		console.log(messages);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -309,6 +312,7 @@ const EmailState = (props) => {
 	const setUserExists = () => dispatch({ type: "SET_USER_EXISTS" });
 	const setLoading = () => dispatch({ type: "SET_LOADING" });
 	const clearLoading = () => dispatch({ type: "CLEAR_LOADING" });
+	const toogleGasMode = () => dispatch({type: "TOOGLE_GAS_MODE", isGasless: !state.isGasless});
 
 	const setDisplayMessage = (message) => dispatch({ type: "SET_DISPLAY_MESSAGE", payload: message });
 
@@ -331,7 +335,10 @@ const EmailState = (props) => {
 				sendMail: sendMail,
 				refreshUserData: refreshUserData,
 				updateAddressLabel: updateAddressLabel,
-				handleActionOnMail: handleActionOnMail
+				handleActionOnMail: handleActionOnMail,
+				toogleGasMode: toogleGasMode,
+				isGasless: state.isGasless,
+				sendMailGasless: sendMailGasless
 			}}
 		>
 			{props.children}

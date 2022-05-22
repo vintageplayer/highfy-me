@@ -9,8 +9,8 @@ import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main({ address }) {
-	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, updateAddressLabel, refreshingMessages } = useContext(UserContext);
-	const { contract } = useContext(Web3Context);
+	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, updateAddressLabel, refreshingMessages, sendMailGasless } = useContext(UserContext);
+	const { contract, web3Provider } = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
 		const listId = e.target.id;
@@ -28,6 +28,8 @@ export default function Main({ address }) {
 						loggedInUser={loggedInUser}
 						contract={contract}
 						sendMail={sendMail}
+						web3Provider={web3Provider}
+						sendMailGasless={sendMailGasless}
 					/>
 				</ListItem>
 

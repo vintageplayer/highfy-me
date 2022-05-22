@@ -102,7 +102,6 @@ export const isTransactionComplete = async (txHash) => {
 };
 
 export const emitSendMail = async (from, to, dataCID, credits, contract) => {
-	console.log('why not here')
 	const txHash = await contract.methods.sendMail(to, dataCID, credits).send({ from: from });
 	console.log(txHash);
 };
@@ -145,9 +144,7 @@ export const getMails = async (mailItems, keys, type) => {
 
 export const prepareAccountFile = async (address, updateCallback) => {
 	const passphrase = "super long and hard to guess secret";
-	console.log("here");
 	updateCallback("Generating New User Keys to encrypt/decrypt..");
-	console.log("here1");
 
 	const { privateKey, publicKey } = await generateKeyPair(passphrase);
 	const keyData = {
@@ -309,9 +306,13 @@ export const prepareEmitMailParams = async (mailObject, dataCID, web3Provider) =
 					type: "string",
 					name: "dataCID",
 				},
+				{
+					type: "uint",
+					name: "credits"
+				}
 			],
 		},
-		[mailObject["from"], mailObject["to"], dataCID]
+		[mailObject["from"], mailObject["to"], dataCID, mailObject["credits"]]
 	);
 
 	let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.

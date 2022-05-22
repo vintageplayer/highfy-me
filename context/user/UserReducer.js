@@ -12,6 +12,7 @@ export const initialState = {
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	userDisplayMessage: 'Checking Account Details',
+	isGasless: false,
 	messageCache: {}
 }
 
@@ -98,7 +99,6 @@ export default function UserReducer(state, action) {
 				userCredits: action.credits
 			}
 		case 'REFRESH_MESSAGES':
-			console.log('refreshing messages', action.messages);
 			return {
 				...state,
 				messages: action.messages
@@ -114,6 +114,11 @@ export default function UserReducer(state, action) {
 			return {
 				...state,
 				refreshingMessages: action.refreshingState
+			}
+		case 'TOOGLE_GAS_MODE':
+			return {
+				...state,
+				isGasless: action.isGasless
 			}
 		default:
 			return state;

@@ -18,7 +18,6 @@ export function getAccessTokenClient () {
 }
 
 function makeStorageClient (isClient) {
-  console.log('here')
   if (isClient) {
     return new Web3Storage({ token: getAccessTokenClient() })
   } else {
@@ -40,7 +39,6 @@ async function storeFiles (files, isClient) {
 }
 
 async function storeWithProgress (files, isClient) {
-  console.log('here2', isClient);
   // show the root cid as soon as it's ready
   const onRootCidReady = cid => {
     console.log('uploading files with cid:', cid)
@@ -57,7 +55,6 @@ async function storeWithProgress (files, isClient) {
   }
 
   // makeStorageClient returns an authorized Web3.Storage client instance
-  console.log('here3', isClient);
   const client = makeStorageClient(isClient)
 
   // client.put will invoke our callbacks during the upload
@@ -71,7 +68,6 @@ function makeFileUrl(cid, fileName) {
 }
 
 export async function storeFilesOnIPFS(files, isClient) {
-  console.log('here1', isClient);
   const fileCID = await storeWithProgress(files, isClient);
   // console.log(fileCID);
   return fileCID;

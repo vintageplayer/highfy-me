@@ -20,9 +20,12 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper  
 } from "@chakra-ui/core";
+import UserContext from "../../context/user/UserContext";
+import {useContext} from 'react';
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {isGasless} = useContext(UserContext);
   const toast = useToast();
 
   const handleSubmit = async (e) => {
@@ -42,17 +45,14 @@ const SendModel = (props) => {
     }
 
     try {
+      
       onClose();
-      // let res = await props.sendMail(mailObject, props.web3Provider, toast);
-      // toast({
-      //   title: res.error ? "Oops" : "Email sent",
-      //   description: res.message,
-      //   status: res.error ? "error" : "success",
-      //   duration: 5000,
-      //   isClosable: true,
-      // });
-      onClose();
-      await props.sendMail(mailObject, props.contract);
+      if(!isGasless){
+        await props.sendMail(mailObject, props.contract);
+      } else {
+        await props.sendMailGasless(mailObject, props.web3Provider, toast );
+      }
+      
       toast({
         title: "Mail Sent.",
         description: "Message Accepted by blockchain.",
