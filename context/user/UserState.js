@@ -39,7 +39,7 @@ const EmailState = (props) => {
 
 		let allCIDs = groupCIDByList(userDetails['data']['account']);
 
-		const credits = userDetails['data']['account']['credits'];		
+		const credits = userDetails['data']['account']['credits'];
 		setDisplayMessage('User Logged In');
 
 		dispatch({
@@ -82,10 +82,12 @@ const EmailState = (props) => {
 		}
 
 		let allCIDs = groupCIDByList(userDetails['data']['account']);
+		const credits = userDetails['data']['account']['credits'];
 
 		dispatch({
 			type: "REFRESH_CID",
 			allCIDs: { ...allCIDs },
+			credits: credits
 		});
 
 		if(!state.refreshingMessages) {
@@ -179,6 +181,7 @@ const EmailState = (props) => {
 				userExists: state.userExists,
 				userLoading: state.userLoading,
 				loggedInUser: state.loggedInUser,
+				userCredits: state.userCredits,
 				activeList: state.activeList,
 				messages: state.messages,
 				message: state.message,
