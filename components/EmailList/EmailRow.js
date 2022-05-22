@@ -2,9 +2,9 @@ import {Flex, Avatar, Box, Text} from '@chakra-ui/core';
 
 export default function EmailRow({message, messageIndex, messageClickHandler}) {
 
-	const name = message ? message['from'] : '';
-	const subject = message ? message['subject'] : '';
-	const body = message ? message['body']?.substr(0, 75) : '';
+	const name = (message && message['from']) ? message['from']['accountAddress'] : '';
+	const subject = (message && message['mailObject']) ? message['mailObject']['subject'] : '';
+	const body = (message && message['mailObject']) ? message['mailObject']['body']?.substr(0, 75) : '';
 	
 	return (
 		<Flex

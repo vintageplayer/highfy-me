@@ -68,18 +68,29 @@ export const emitCreateAccount = async (address, keyCID, contract) => {
 	console.log(txHash);
 }
 
-export const emitSendMail = async (from, to, dataCID, contract) => {
-	const txHash = await contract.methods.sendMail(to, dataCID).send({from: from});
+export const emitSendMail = async (from, to, dataCID, credits, contract) => {
+	const txHash = await contract.methods.sendMail(to, dataCID, credits).send({from: from});
+	console.log(txHash);
+}
+
+export const emitChangeLabel = async (from, to, label, contract) => {
+	console.log()
+	const txHash = await contract.methods.modifySenderLabel(from, label).send({from: to});
+	console.log(txHash);
+}
+
+export const emitMailAction = async (from, to, dataCID, action, contract) => {
+	const txHash = await contract.methods.mailAction(from, dataCID, action).send({from: to});
 	console.log(txHash);
 }
 
 export const getMails = async(mailItems, keys, type) => {
 	return await Promise.all(mailItems.map(async (mailItem) => {
-		const mailFileData = await retrieveFile(mailItem['id'], type, 'blob');
+		const mailFileData = await retrieveFile(mailItem['dataCID'], type, 'blob');
 		try {
-			return {...JSON.parse(await decryptMail(mailFileData, keys)), id: mailItem['id']}
+			return {...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys))}
 		} catch {
-			return {}
+			return {...mailItem, mailObject: {}}
 		}
 	}));
 }

@@ -1,6 +1,5 @@
 import { Fragment } from "react";
-// import { Base64 } from "js-base64";
-import { BsPlusCircle } from "react-icons/bs";
+import { BsChatLeftText } from "react-icons/bs";
 import {
   Button,
   Modal,
@@ -15,10 +14,12 @@ import {
   Textarea,
   useToast,
   useDisclosure,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper  
 } from "@chakra-ui/core";
-import {useContext} from 'react';
-import {sendMail} from '../../utils/mailUtils'
-import Web3Context from "../../context/web3/Web3Context";
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -30,14 +31,16 @@ const SendModel = (props) => {
     const receiver = form.elements["emailTo"].value;
     const subject = form.elements["subject"].value;
     const mailBody = form.elements["message"].value;
+    const credits = form.elements["credits"].value;
 
     const mailObject = {
       to: receiver,
       from: props.loggedInUser,
       subject: subject,
-      body: mailBody
+      body: mailBody,
+      credits: credits
     }
-    
+
     try {
       toast({
         title: "Processing Mail.",
@@ -47,8 +50,16 @@ const SendModel = (props) => {
         isClosable: true,
       });
       onClose();
-      await props.sendMail(mailObject, props.contract, props.web3Provider);
-    } catch {
+      await props.sendMail(mailObject, props.contract);
+      toast({
+        title: "Mail Sent.",
+        description: "Message Accepted by blockchain.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (e) {
+      console.log(e);
       toast({
         title: "An error occurred.",
         description: "Unable to sent your email.",
@@ -64,7 +75,7 @@ const SendModel = (props) => {
       <Button
         w='100%'
         h='48px'
-        leftIcon={BsPlusCircle}
+        leftIcon={BsChatLeftText}
         borderRadius='20px'
         variant='solid'
         variantColor='blue'
@@ -107,6 +118,16 @@ const SendModel = (props) => {
                   size='xl'
                   resize='vertical'
                 />
+              </FormControl>
+              <FormControl>
+                <label>Enter Credits:</label>
+                <NumberInput defaultValue={0} min={0} max={5}>
+                  <NumberInputField id='credits' />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
               </FormControl>
             </ModalBody>
 

@@ -1,7 +1,17 @@
 import UserContext from "./UserContext";
 import {useReducer} from 'react';
 import UserReducer, {initialState} from "./UserReducer";
-import {createAccount, getUserDetails, fetchKeys, getMails, prepareMailFile, emitCreateAccount, emitSendMail} from '../../utils/mailUtils'
+import {
+	createAccount,
+	getUserDetails,
+	fetchKeys,
+	getMails,
+	prepareMailFile,
+	emitCreateAccount,
+	emitSendMail,
+	emitChangeLabel,
+	emitMailAction
+} from '../../utils/mailUtils'
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
@@ -26,38 +36,56 @@ const EmailState = (props) => {
 			return;
 		}
 		console.log('User Logged In');
-		const inboxCIDs= userDetails['data']['account']['inbox'];
-		const sentCIDs= userDetails['data']['account']['mailsSent'];
-		setDisplayMessage('User Logged In')
 
-    dispatch({
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+
+		const credits = userDetails['data']['account']['credits'];		
+		setDisplayMessage('User Logged In');
+
+		dispatch({
 			type: "LOGIN_USER",
 			loggedInUser: address,
 			keyCID: cid,
 			keys: keys,
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
-			// allMails: {...state.allMails, "INBOX": inboxMessages, "SENT": sentMessages}
+			credits: credits,
+			allCIDs: { ...allCIDs }			
 		});
 	};
 
+	const groupCIDByList = (userAccount) => {
+		let allCIDs = {
+			"INBOX":[],
+			"COLLECT":[],
+			"SUBSCRIPTIONS": [],
+			"SENT": [...userAccount['mailsSent']],
+			"SPAM": []
+		};
+
+		userAccount['inbox'].forEach( (message) => {
+			allCIDs[message.receiverLabel].push({...message})
+		});
+		return allCIDs;
+	}
+
 	const getMessages = async (listId) => {
-		if (listId === "INBOX") {
-			return await getMails(state.allCIDs["INBOX"], state.userKeys, "inbox");
-		} else if (listId === "SENT") {
+		if (listId === "SENT") {
 			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
 		} else {
-			return [];
+			return await getMails(state.allCIDs[listId], state.userKeys, "inbox");
 		}
 	};
 
 	const refreshUserData = async () => {
 		const userDetails = await getUserDetails(state.loggedInUser);
-		const inboxCIDs = userDetails["data"]["account"]["inbox"];
-		const sentCIDs = userDetails["data"]["account"]["mailsSent"];
-		
+		if (!userDetails['data']['account']) {
+			return;
+		}
+
+		let allCIDs = groupCIDByList(userDetails['data']['account']);
+
 		dispatch({
 			type: "REFRESH_CID",
-			allCIDs: { ...state.allCIDs, INBOX: inboxCIDs, SENT: sentCIDs },
+			allCIDs: { ...allCIDs },
 		});
 
 		if(!state.refreshingMessages) {
@@ -74,6 +102,7 @@ const EmailState = (props) => {
 		setLoading();
 		setRefreshingMail(true);
 		const messages = await getMessages(listId);
+		console.log(messages);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -129,7 +158,17 @@ const EmailState = (props) => {
 	const sendMail = async (mailObject, contract) => {
 		const receiver = mailObject["to"];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
-		await emitSendMail(state.loggedInUser, receiver, dataCID, contract);
+		await emitSendMail(state.loggedInUser, receiver, dataCID, mailObject['credits'], contract);
+	};
+
+	const updateAddressLabel = async (fromAddress, newLabel, contract) => {
+		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
+	};
+
+	const handleActionOnMail = async (message, action, contract) => {
+		const from = message['from']['accountAddress']
+		const dataCID = message['dataCID']
+		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
 
 	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });
@@ -149,9 +188,10 @@ const EmailState = (props) => {
 				createUser: createUser,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
-				getMessages: getMessages,
 				sendMail: sendMail,
-				refreshUserData: refreshUserData
+				refreshUserData: refreshUserData,
+				updateAddressLabel: updateAddressLabel,
+				handleActionOnMail: handleActionOnMail
 			}}
 		>
 			{props.children}
