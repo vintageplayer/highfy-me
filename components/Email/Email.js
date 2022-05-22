@@ -33,6 +33,12 @@ export default function Email() {
 		ifrm.body.innerHTML = message.body;
 	};
 
+	const getLocaleDateFromEpoch = (epoch) => {
+		var d= new Date(0);
+		d.setUTCSeconds(epoch)
+		return d.toString()
+	}
+
 	const mainActionHandler = async (e) => {
 		e.preventDefault();
 		const from = e.target;
@@ -111,7 +117,7 @@ export default function Email() {
 									From: {message['from']['accountAddress']}
 								</Text>
 								<Text fontSize='sm' color='gray.500'>
-									15-May-2022
+									{getLocaleDateFromEpoch(message['blockTime'])}
 								</Text>
 							</Box>
 						</Flex>
