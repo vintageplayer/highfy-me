@@ -1,17 +1,17 @@
 # HighFy Me
-## Contents
-1. Introduction
-2. Features
-3. Deep-Dive:
-	- Scenarios
-	- Application Screenshots
-	- Architecture
-	- IPFS Screenshots
-4. Using it locally
-
 ## Introduction
 HighFy Me is a fully decentralized, web3 native, wallet-to-wallet messaging system.
 The motivation was to avoid the spam and missed out updates while using discord & twitter.
+
+## Contents
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [Deep-Dive](#deep-dive):
+	- [Scenarios](#scenarios)
+	- [Application Screenshots](#application-screenshots)
+	- [Architecture](#architecture)
+	- [IPFS Screenshots](#ipfs-screenshots)
+4. [Using it locally](#using-it-locally)
 
 ## Features:
 1. Decentralized: Uses IFPS to store data and blockchain events to maintain provenance
@@ -56,8 +56,12 @@ Components:
 
 Note: The contract code and graph indexer schema & mapping can be found [here](https://github.com/vintageplayer/highfy-me-graph).
 
+Sample Files:
+1. [Mail IFPS File](https://bafybeic5zyqu332obv3rvfvtex3wfgx5ipknxdgz4hzmemkw7vuxz5k4ku.ipfs.dweb.link)
+2. [Key IPFS File](https://bafybeibg4hlpyosc7iswtzch5kjhdxss3r526r6ywvlykt2osynxjgjp5e.ipfs.dweb.link)
+
 ### IPFS Screenshots
-1. User Keys IPFS File:
+1. User Keys IPFS File: 
 ![UserKeysFile](https://github.com/vintageplayer/highfy-me/blob/master/docs/images/SampleKeyFile.png?raw=true)
 
 2. User Private Key IPFS Content:
