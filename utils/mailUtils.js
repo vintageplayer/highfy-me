@@ -84,15 +84,13 @@ export const emitMailAction = async (from, to, dataCID, action, contract) => {
 	console.log(txHash);
 }
 
-export const getMails = async(mailItems, keys, type) => {
-	return await Promise.all(mailItems.map(async (mailItem) => {
-		const mailFileData = await retrieveFile(mailItem['dataCID'], type, 'blob');
-		try {
-			return {...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys))}
-		} catch {
-			return {...mailItem, mailObject: {}}
-		}
-	}));
+export const getMail = async(mailItem, keys, type) => {
+	const mailFileData = await retrieveFile(mailItem['dataCID'], type, 'blob');
+	try {
+		return {...mailItem, mailObject: JSON.parse(await decryptMail(mailFileData, keys))}
+	} catch {
+		return {...mailItem, mailObject: {}}
+	}
 }
 
 export const createAccount = async (address, updateCallback) => {
