@@ -6,7 +6,7 @@ import {executeGraphQuery} from '../../../utils/serverUtils'
 //         "account": {
 //             "accountAddress": "0x13782baa7ddf58ecf4a0fd9f38fd003f9955b217",
 //             "keyCID": "bafybeibg4hlpyosc7iswtzch5kjhdxss3r526r6ywvlykt2osynxjgjp5e",
-//             "credits": "4",
+//             "credits": "6",
 //             "mailsSent": [
 //                 {
 //                     "id": "bafybeifh5lfmlv7mfkwzmf5blqg73hvwbxww47hmzarnpr2mnh24rbk7ii",
@@ -17,6 +17,7 @@ import {executeGraphQuery} from '../../../utils/serverUtils'
 //                     "to": {
 //                         "accountAddress": "0xe95c4707ecf588dfd8ab3b253e00f45339ac3054"
 //                     },
+//                     "blockTime": "1653160824",
 //                     "credits": "1",
 //                     "creditStatus": "PENDING"
 //                 }
@@ -31,6 +32,7 @@ import {executeGraphQuery} from '../../../utils/serverUtils'
 //                     "to": {
 //                         "accountAddress": "0x13782baa7ddf58ecf4a0fd9f38fd003f9955b217"
 //                     },
+//                     "blockTime": "1653164853",
 //                     "credits": "0",
 //                     "creditStatus": "INVALID",
 //                     "receiverLabel": "SPAM"
@@ -44,9 +46,10 @@ import {executeGraphQuery} from '../../../utils/serverUtils'
 //                     "to": {
 //                         "accountAddress": "0x13782baa7ddf58ecf4a0fd9f38fd003f9955b217"
 //                     },
+//                     "blockTime": "1653164883",
 //                     "credits": "2",
-//                     "creditStatus": "PENDING",
-//                     "receiverLabel": "COLLECT"
+//                     "creditStatus": "COLLECTED",
+//                     "receiverLabel": "INBOX"
 //                 }
 //             ]
 //         }
@@ -68,6 +71,7 @@ export default async function userMailDetailsHandler({ query: { address } }, res
             to {
               accountAddress
             }
+            blockTime
             credits
             creditStatus
           }
@@ -80,6 +84,7 @@ export default async function userMailDetailsHandler({ query: { address } }, res
             to {
               accountAddress
             }
+            blockTime
             credits
             creditStatus
             receiverLabel
