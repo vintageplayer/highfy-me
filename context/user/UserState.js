@@ -5,7 +5,7 @@ import {
 	createAccount,
 	getUserDetails,
 	fetchKeys,
-	getMails,
+	getMail,
 	prepareMailFile,
 	emitCreateAccount,
 	emitSendMail,
@@ -68,11 +68,27 @@ const EmailState = (props) => {
 	}
 
 	const getMessages = async (listId) => {
+		const messageCIDs = [...state.allCIDs[listId]];
+		let fileLabel = 'inbox';
 		if (listId === "SENT") {
-			return await getMails(state.allCIDs["SENT"], state.userKeys, "sent");
-		} else {
-			return await getMails(state.allCIDs[listId], state.userKeys, "inbox");
+			fileLabel = 'sent';
 		}
+		let messages = await Promise.all(messageCIDs.map( async (message) => {
+			const messageId = message['id'];
+			if (state.messageCache[messageId]) {
+				return state.messageCache[messageId]
+			} else {
+				const messageData = await getMail(message, state.userKeys, fileLabel);
+				// Update Message Cachce
+				dispatch({
+					type: 'CACHE_MESSAGE',
+					messageId: messageId,
+					messageData: messageData,
+				});
+				return messageData;
+			}
+		}));
+		return messages;
 	};
 
 	const refreshUserData = async () => {
