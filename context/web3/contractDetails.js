@@ -510,7 +510,7 @@ export const mailContract = {
       "events": {},
       "links": {},
       "address": "0x34cef373b5d6a08d821f2de97c4f45bf1784493f"
-    }
+    },
     "71401": {
       "events": {},
       "links": {},
