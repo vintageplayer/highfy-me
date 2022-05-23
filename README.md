@@ -3,6 +3,14 @@
 HighFy Me is a fully decentralized, web3 native, wallet-to-wallet messaging system.
 The motivation was to avoid the spam and missed out updates while using discord & twitter.
 
+Demo: [HighFy.me](https://www.highfy.me/)
+
+Videos:
+1. Account Creation: https://youtu.be/NokLvVyfylI
+2. Sending Messages: https://youtu.be/iLrKfVtC-lU
+3. Responding To Messages & Collecting Payments: https://youtu.be/b6vhCSS8C9Q
+4. Whitelisting a Message: https://youtu.be/rj3HkjvEyW8
+
 ## Contents
 1. [Introduction](#introduction)
 2. [Features](#features)
