@@ -35,7 +35,13 @@ const ChangeLabelModel = (props) => {
         isClosable: true,
       });
       onClose();
-      await props.updateAddressLabel(fromAddress, addressLabel, props.contract);
+
+      if(!props.isGasless){
+        await props.updateAddressLabel(fromAddress, addressLabel, props.contract);
+      } else {
+        await props.updateAddressLabelGasless(fromAddress, addressLabel, props.web3Provider, toast);
+      }
+      
       toast({
         title: "Update Completed.",
         description: "Preference Caputured on Chain.",

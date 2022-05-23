@@ -19,8 +19,8 @@ import {
 } from '@chakra-ui/core';
 
 export default function Email() {
-	const { activeList, message, handleActionOnMail } = useContext(UserContext);
-	const { contract } = useContext(Web3Context);
+	const { activeList, message, handleActionOnMail, isGasless } = useContext(UserContext);
+	const { contract, web3Provider } = useContext(Web3Context);
 	const toast = useToast();
 
 	useEffect(() => {
@@ -51,7 +51,12 @@ export default function Email() {
 	        duration: 3000,
 	        isClosable: true,
 	      });
-	      await handleActionOnMail(message, action, contract);
+		  if(!isGasless){
+			await handleActionOnMail(message, action, contract);
+		  } else {
+			await handleActionOnMailGasless(message, action, web3Provider, toast);
+		  }
+	      
 	      toast({
 	        title: "Response Updated.",
 	        description: "Response has been recorded on blockchain.",
@@ -139,23 +144,28 @@ export default function Email() {
 				(<>
 					<hr />
 					<br />
-					<Flex justify='right' wrap='no-wrap' mb={2}>
-						<form id='form' onSubmit={mainActionHandler}>
-							<Stack isInline="true">
-								<FormControl>
-									<Select id="mailAction">
-										<option value='ACCEPT_MAIL'>Collect & Whitelist</option>
-										<option value='REFUND_MAIL'>Refund & Whitelist</option>
-										<option value='SPAM_MAIL'>Collect & Mark Spam</option>
-									</Select>
-								</FormControl>
-								<FormControl>
-									<Button type='submit' variantColor='green'>
-										Submit
-									</Button>
-								</FormControl>
-							</Stack>
-						</form>
+					<Flex justify='space-between' wrap='no-wrap'>
+						<Flex justify='right' wrap='no-wrap' mb={2}>
+							<FormLabel>Credits: {message['credits']}</FormLabel>
+						</Flex>
+						<Flex justify='right' wrap='no-wrap' mb={2}>
+							<form id='form' onSubmit={mainActionHandler}>
+								<Stack isInline="true">
+									<FormControl>
+										<Select id="mailAction">
+											<option value='ACCEPT_MAIL'>Collect & Whitelist</option>
+											<option value='REFUND_MAIL'>Refund & Whitelist</option>
+											<option value='SPAM_MAIL'>Collect & Mark Spam</option>
+										</Select>
+									</FormControl>
+									<FormControl>
+										<Button type='submit' variantColor='green'>
+											Submit
+										</Button>
+									</FormControl>
+								</Stack>
+							</form>
+						</Flex>
 					</Flex>
 				</>)}
 			</>

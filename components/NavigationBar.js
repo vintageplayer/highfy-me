@@ -1,5 +1,6 @@
 import { Nav, Navbar, Container, Button, ToggleButton } from "react-bootstrap";
 import {useState, useEffect, useContext} from 'react';
+import { Switch } from '@chakra-ui/core'
 import UserContext from "../context/user/UserContext";
 
 const NavigationBar = ({ disconnectHandler, address, credits }) => {
@@ -21,22 +22,7 @@ const NavigationBar = ({ disconnectHandler, address, credits }) => {
           </Navbar.Text>
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
-          <ToggleButton
-            className="mb-2"
-            id="toggle-check"
-            type="checkbox"
-            variant="outline-primary"
-            checked={isGasless}
-            value="1"
-            onChange={(e) => toogleGasMode()}
-          >
-            { isGasless ? (
-              <Navbar.Text>Gasless mode</Navbar.Text>
-            ) : (
-              <Navbar.Text>Transaction mode</Navbar.Text>
-            )
-          }
-          </ToggleButton>
+          Use Gasless mode ?  <Switch isChecked={isGasless}  onChange={(e) => toogleGasMode()} size='sm' />
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
           <Button variant="outline-success" onClick={disconnectHandler}>

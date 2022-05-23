@@ -5,9 +5,20 @@ import Web3 from 'web3'
 import Web3Modal from 'web3modal';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import WalletLink from 'walletlink';
-import {mailContract} from '../../contracts/abi/mailDetails'
+import {mailContract} from './contractDetails'
+import * as UAuthWeb3Modal from '../../utils/uauth_web3modal'
+import UAuthSPA from '@uauth/js'
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
+
+// These options are used to construct the UAuthSPA instance.
+export const uauthOptions = {
+  clientID: 'client_id',
+  redirectUri: 'http://localhost:3000',
+
+  // Must include both the openid and wallet scopes.
+  scope: 'openid wallet',
+}
 
 const providerOptions = {
   walletconnect: {
@@ -38,6 +49,12 @@ const providerOptions = {
       return provider
     },
   },
+  'custom-uauth': {
+  	display: UAuthWeb3Modal.display,
+  	connector: UAuthWeb3Modal.connector,
+  	package: UAuthSPA,
+  	options: uauthOptions,
+  }
 }
 
 const getContract = async (web3Provider, chainId) => {
@@ -80,7 +97,14 @@ const Web3State = (props) => {
 			})
 		}
 
-		const provider = await state.web3Modal.connect()
+		let provider;
+		try {
+			provider = await state.web3Modal.connect()
+		} catch (e) {
+			console.log(e);
+			dispatch({type:'RESET_WEB3_PROVIDER'})
+			return
+		}
 		const web3Provider = new Web3(ethereum);
 		const accounts = await web3Provider.eth.getAccounts();
 		setDisplayMessage('Fetching Account address')

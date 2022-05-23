@@ -1,0 +1,3 @@
+[submodule "highfy-me-graph"]
+	path = highfy-me-graph
+	url = https://github.com/vintageplayer/highfy-me-graph

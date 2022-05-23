@@ -25,7 +25,7 @@ import {useContext} from 'react';
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const {isGasless} = useContext(UserContext);
+  const { isGasless } = useContext(UserContext);
   const toast = useToast();
 
   const handleSubmit = async (e) => {

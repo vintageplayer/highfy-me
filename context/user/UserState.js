@@ -13,7 +13,8 @@ import {
 	emitMailAction,
 	prepareEmitMailParams,
 	emitToRelayer,
-	isTransactionComplete
+	isTransactionComplete,
+	prepareChangeLabelParams
 } from '../../utils/mailUtils';
 import { mailContract } from '../../contracts/abi/mailDetails';
 
@@ -81,8 +82,9 @@ const EmailState = (props) => {
 		let messages = await Promise.all(messageCIDs.map( async (message) => {
 			const messageId = message['id'];
 			if (state.messageCache[messageId]) {
-				return state.messageCache[messageId]
+				return { ...message, mailObject: state.messageCache[messageId]['mailObject']}
 			} else {
+				try {
 				const messageData = await getMail(message, state.userKeys, fileLabel);
 				// Update Message Cachce
 				dispatch({
@@ -91,6 +93,10 @@ const EmailState = (props) => {
 					messageData: messageData,
 				});
 				return messageData;
+				} catch (e) {
+					console.log(e);
+					return message;
+				}
 			}
 		}));
 		return messages;
@@ -300,10 +306,76 @@ const EmailState = (props) => {
 		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
 	};
 
+	const updateAddressLabelGasless = async (fromAddress, newLabel, web3Provider, toast) => {
+		const {calldata, signature} = await prepareChangeLabelParams(fromAddress, state.loggedInUser , newLabel, web3Provider);
+
+		try {
+			txHash = await emitToRelayer(
+				state.loggedInUser,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Error pushing message to chain, please try again.",
+			};
+		}
+
+
+		while (!transactionComplete) {
+			toast({
+				title: "Processing Mail.",
+				description: "Transaction is being processed tx hash: " + txHash + "...",
+				status: "info",
+				duration: 2000,
+				isClosable: true,
+			});
+			transactionComplete = await isTransactionComplete(txHash);
+			
+			await sleep(2000);
+		}
+	};
+
 	const handleActionOnMail = async (message, action, contract) => {
 		const from = message['from']['accountAddress']
 		const dataCID = message['dataCID']
 		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
+	};
+
+	const handleActionOnMailGasless = async (message, action, web3Provider, toast) => {
+		const from = message['from']['accountAddress']
+		const dataCID = message['dataCID']
+		const {calldata, signature} = await prepareMailActionParams(from, state.loggedInUser, dataCID, action, web3Provider);
+
+		try {
+			txHash = await emitToRelayer(
+				state.loggedInUser,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Error pushing message to chain, please try again.",
+			};
+		}
+
+
+		while (!transactionComplete) {
+			toast({
+				title: "Processing Mail.",
+				description: "Transaction is being processed tx hash: " + txHash + "...",
+				status: "info",
+				duration: 2000,
+				isClosable: true,
+			});
+			transactionComplete = await isTransactionComplete(txHash);
+			
+			await sleep(2000);
+		}
 	};
 
 	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
@@ -338,7 +410,9 @@ const EmailState = (props) => {
 				handleActionOnMail: handleActionOnMail,
 				toogleGasMode: toogleGasMode,
 				isGasless: state.isGasless,
-				sendMailGasless: sendMailGasless
+				sendMailGasless: sendMailGasless,
+				handleActionOnMailGasless: handleActionOnMailGasless,
+				updateAddressLabelGasless: updateAddressLabelGasless
 			}}
 		>
 			{props.children}
