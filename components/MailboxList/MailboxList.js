@@ -9,7 +9,7 @@ import UserContext from "../../context/user/UserContext";
 import Web3Context from "../../context/web3/Web3Context";
 
 export default function Main({ address }) {
-	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, updateAddressLabel, refreshingMessages, sendMailGasless, isGasless } = useContext(UserContext);
+	const { userLoading, loggedInUser, activeList, setActiveList, sendMail, updateAddressLabel, refreshingMessages, sendMailGasless, isGasless, updateAddressLabelGasless } = useContext(UserContext);
 	const { contract, web3Provider } = useContext(Web3Context);
 
 	const selectMailList = async (e) => {
@@ -126,7 +126,8 @@ export default function Main({ address }) {
 						contract={contract}
 						updateAddressLabel={updateAddressLabel}
 						web3Provider={web3Provider}
-						isGasless = {isGasless}
+						isGasless={isGasless}
+						updateAddressLabelGasless={updateAddressLabelGasless}
 					/>
 				</ListItem>
 			</List>

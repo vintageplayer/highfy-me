@@ -12,7 +12,7 @@ export const initialState = {
 	allCIDs: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	allMails: {"INBOX":[], "COLLECT":[], "SUBSCRIPTIONS": [], "SENT":[], "SPAM": []},
 	userDisplayMessage: 'Checking Account Details',
-	isGasless: false,
+	isGasless: true,
 	messageCache: {}
 }
 

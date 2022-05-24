@@ -1,4 +1,6 @@
-import { Flex, Button, Text } from "@chakra-ui/core";
+import { Flex, Button, Text, Switch } from "@chakra-ui/core";
+import {useContext} from 'react';
+import UserContext from "../context/user/UserContext";
 
 const CustomButton = ({children, isLoading, onClick}) => (
   <Button
@@ -15,11 +17,21 @@ const CustomButton = ({children, isLoading, onClick}) => (
 );
 
 export default function SignIn ({userDisplayMessage, web3DisplayMessage, web3Loading, web3Provider, connectHandler, disconnectHandler, createUserHandler, userExists, userLoading}) {
+	const {toogleGasMode, isGasless} = useContext(UserContext);
 	return (
 		<div>
 	      <main>
-	        <h1 className="title">HighFy Me </h1>
+			  <div>
+				  <row style={{"display": "flow-root"}}>
+				  <column style={{"float": "left"}}><h1 className="title">HighFy Me</h1></column>
+				  <column style={{"float": "right"}}>Use Gasless mode ? <Switch isChecked={isGasless}  onChange={(e) => toogleGasMode()} size='sm' /> </column>
+				  </row>
+				  
+			  </div>
+	           
+			
 	        <Flex h='35vh' justify='center' alignItems='center' bg='#e5f4f1'></Flex>
+			
 	        <Flex h='5vh' justify='center' alignItems='center' bg='#e5f4f1'>
 	        { !web3Provider ? (
 	        		<Text>{web3DisplayMessage}</Text>

@@ -199,13 +199,13 @@ export const createAccount = async (address, updateCallback) => {
         publicKey: publicKey,
         passphrase: passphrase,
     };
-    console.log("wtf");
+    
     updateCallback("Encrypting User Keys Using Wallet...");
     // Encrypt keys & passphrase with wallet
-    console.log("hereeee -- ", keyData, address);
+    
     const encryptedKeyData = await encryptUsingWallet(keyData, address);
     const encryptedKeyFileName = `web3_mail_info`;
-    console.log("her1");
+    
     updateCallback("Creating Keys to Store on IPFS...");
     const encryptedKeyFile = makeFileObject(encryptedKeyData, encryptedKeyFileName);
 
@@ -288,30 +288,30 @@ export const prepareMailFile = async (mailObject, senderPublicKey) => {
 };
 
 export const prepareEmitMailParams = async (mailObject, dataCID, web3Provider) => {
+	console.log(mailObject);
     let calldata = web3Provider.eth.abi.encodeFunctionCall(
         {
-            name: "sendMail",
-            type: "function",
-            inputs: [
-                {
-                    type: "address",
-                    name: "from",
-                },
-                {
-                    type: "address",
-                    name: "to",
-                },
-                ,
-                {
-                    type: "string",
-                    name: "dataCID",
-                },
-                {
-                    type: "uint",
-                    name: "credits",
-                },
-            ],
-        },
+			"inputs": [
+				{
+					"name": "from",
+					"type": "address"
+				},
+				{
+					"name": "to",
+					"type": "address"
+				},
+				{
+					"name": "dataCID",
+					"type": "string"
+				},
+				{
+					"name": "credits",
+					"type": "uint256"
+				}
+			],
+			"name": "sendMail",
+			"type": "function"
+		},
         [mailObject["from"], mailObject["to"], dataCID, mailObject["credits"]]
     );
 
@@ -348,7 +348,7 @@ export const prepareChangeLabelParams = async (from, to, label, web3Provider) =>
     );
 
     let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.
-    let signature = await web3Provider.eth.sign(hash, from);
+    let signature = await web3Provider.eth.sign(hash, to);
 
     return { calldata, signature };
 };
@@ -385,7 +385,7 @@ export const prepareMailActionParams = async (from, to, dataCID, action, web3Pro
     );
 
     let hash = web3Provider.utils.soliditySha3(calldata); // sign the hash.
-    let signature = await web3Provider.eth.sign(hash, from);
+    let signature = await web3Provider.eth.sign(hash, to);
 
     return { calldata, signature };
 };

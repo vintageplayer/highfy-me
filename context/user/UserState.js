@@ -14,7 +14,10 @@ import {
 	prepareEmitMailParams,
 	emitToRelayer,
 	isTransactionComplete,
-	prepareChangeLabelParams
+	prepareChangeLabelParams,
+	prepareAccountFile,
+	prepareEmitAccountParams,
+	prepareMailActionParams
 } from '../../utils/mailUtils';
 import { mailContract } from '../../contracts/abi/mailDetails';
 
@@ -308,6 +311,8 @@ const EmailState = (props) => {
 
 	const updateAddressLabelGasless = async (fromAddress, newLabel, web3Provider, toast) => {
 		const {calldata, signature} = await prepareChangeLabelParams(fromAddress, state.loggedInUser , newLabel, web3Provider);
+		let txHash = "";
+		let transactionComplete = false;
 
 		try {
 			txHash = await emitToRelayer(
@@ -326,7 +331,7 @@ const EmailState = (props) => {
 
 		while (!transactionComplete) {
 			toast({
-				title: "Processing Mail.",
+				title: "Processing Change.",
 				description: "Transaction is being processed tx hash: " + txHash + "...",
 				status: "info",
 				duration: 2000,
@@ -347,6 +352,9 @@ const EmailState = (props) => {
 	const handleActionOnMailGasless = async (message, action, web3Provider, toast) => {
 		const from = message['from']['accountAddress']
 		const dataCID = message['dataCID']
+		let txHash = "";
+		let transactionComplete = false;
+		
 		const {calldata, signature} = await prepareMailActionParams(from, state.loggedInUser, dataCID, action, web3Provider);
 
 		try {
@@ -402,6 +410,7 @@ const EmailState = (props) => {
 				loginUser: loginUser,
 				resetUser: resetUser,
 				createUser: createUser,
+				createUserGasless: createUserGasless,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
 				sendMail: sendMail,
@@ -412,7 +421,7 @@ const EmailState = (props) => {
 				isGasless: state.isGasless,
 				sendMailGasless: sendMailGasless,
 				handleActionOnMailGasless: handleActionOnMailGasless,
-				updateAddressLabelGasless: updateAddressLabelGasless
+				updateAddressLabelGasless: updateAddressLabelGasless,
 			}}
 		>
 			{props.children}

@@ -11,7 +11,7 @@ import UserContext from "../context/user/UserContext";
 
 const App = () => {
   const {web3DisplayMessage, web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
-  const {userDisplayMessage, message, userCredits, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
+  const {userDisplayMessage, message, userCredits, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser, isGasless, createUserGasless} = useContext(UserContext);
 
   const connectHandler = async (e) => {
     await connect();
@@ -40,7 +40,12 @@ const App = () => {
   }, [provider, disconnect]);
 
   const createUserHandler = async (e) => {
-    createUser(address, contract);
+    if(!isGasless){
+      createUser(address, contract);
+    } else {
+      createUserGasless(address, web3Provider);
+    }
+    
   };
 
   useEffect(() => {

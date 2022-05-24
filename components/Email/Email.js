@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/core';
 
 export default function Email() {
-	const { activeList, message, handleActionOnMail, isGasless } = useContext(UserContext);
+	const { activeList, message, handleActionOnMail, handleActionOnMailGasless, isGasless } = useContext(UserContext);
 	const { contract, web3Provider } = useContext(Web3Context);
 	const toast = useToast();
 
