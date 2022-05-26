@@ -110,7 +110,7 @@ const Web3State = (props) => {
 		setDisplayMessage('Fetching Account address')
 		const address = accounts[0];
 		const networkId = await web3Provider.eth.net.getId();
-		setDisplayMessage('Loading Contrat For Network')
+		setDisplayMessage('Loading Contract For Network')
 		const contract = await getContract(web3Provider, networkId);
 
 		provider.on('accountsChanged', handleAccountsChanged)
