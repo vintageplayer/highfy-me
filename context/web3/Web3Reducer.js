@@ -6,7 +6,7 @@ export const initialState = {
   address: null,
   chainId: null,
   contract: null,
-  web3DisplayMessage: 'Connect Wallet to Login or Sign Up'
+  web3DisplayMessage: 'Connect Wallet to Login or Sign Up (Please be in Rinkeby Chain)'
 };
 
 function web3Reducer(state, action) {
