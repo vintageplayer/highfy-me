@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react";
+import { useToast } from "@chakra-ui/core";
 
 // Import Pages
 import Main from "../components/Main";
@@ -10,44 +11,49 @@ import UserContext from "../context/user/UserContext";
 
 const App = () => {
   const {web3DisplayMessage, web3Loading, address, web3Provider, connect, disconnect, web3Modal, provider, removeListeners, contract } = useContext(Web3Context);
-  const {userDisplayMessage, message, userCredits, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser} = useContext(UserContext);
+  const {userDisplayMessage, message, userCredits, userExists, userLoading, loggedInUser, loginUser, resetUser, createUser, isGasless, createUserGasless} = useContext(UserContext);
 
   const connectHandler = async (e) => {
     await connect();
   };
 
-  const disconnectHandler = async (e) => {  
+  const disconnectHandler = async (e) => {
     disconnect();
   };
-
-  const createUserHandler = async(e) => {
-    createUser(address, contract)
-  }
 
   // Auto connect to the cached provider
   useEffect(() => {
     if (web3Modal && web3Modal.cachedProvider) {
-      connect()
+      connect();
     }
-  }, [web3Modal])
+  }, [web3Modal]);
 
   useEffect(() => {
     if (provider?.on) {
       // Subscription Cleanup
       return () => {
         if (provider.removeListener) {
-          removeListeners
+          removeListeners;
         }
-      }
+      };
     }
-  }, [provider, disconnect])
+  }, [provider, disconnect]);
+
+  const createUserHandler = async (e) => {
+    if(!isGasless){
+      createUser(address, contract);
+    } else {
+      createUserGasless(address, web3Provider);
+    }
+    
+  };
 
   useEffect(() => {
-    if (address && address!==loggedInUser) {
+    if (address && address !== loggedInUser) {
       resetUser();
       loginUser(address);
     }
-  }, [address, loggedInUser])
+  }, [address, loggedInUser]);
 
   return (
     <>
@@ -71,8 +77,8 @@ const App = () => {
           createUserHandler={createUserHandler}
           web3DisplayMessage={web3DisplayMessage}
           userDisplayMessage={userDisplayMessage}
-        />)
-      }
+        />
+      )}
     </>
   );
 };

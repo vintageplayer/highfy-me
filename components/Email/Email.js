@@ -19,8 +19,8 @@ import {
 } from '@chakra-ui/core';
 
 export default function Email() {
-	const { activeList, message, handleActionOnMail } = useContext(UserContext);
-	const { contract } = useContext(Web3Context);
+	const { activeList, message, handleActionOnMail, handleActionOnMailGasless, isGasless } = useContext(UserContext);
+	const { contract, web3Provider } = useContext(Web3Context);
 	const toast = useToast();
 
 	useEffect(() => {
@@ -51,7 +51,12 @@ export default function Email() {
 	        duration: 3000,
 	        isClosable: true,
 	      });
-	      await handleActionOnMail(message, action, contract);
+		  if(!isGasless){
+			await handleActionOnMail(message, action, contract);
+		  } else {
+			await handleActionOnMailGasless(message, action, web3Provider, toast);
+		  }
+	      
 	      toast({
 	        title: "Response Updated.",
 	        description: "Response has been recorded on blockchain.",

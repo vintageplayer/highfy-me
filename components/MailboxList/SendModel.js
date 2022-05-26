@@ -20,9 +20,12 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper  
 } from "@chakra-ui/core";
+import UserContext from "../../context/user/UserContext";
+import {useContext} from 'react';
 
 const SendModel = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isGasless } = useContext(UserContext);
   const toast = useToast();
 
   const handleSubmit = async (e) => {
@@ -42,15 +45,14 @@ const SendModel = (props) => {
     }
 
     try {
-      toast({
-        title: "Processing Mail.",
-        description: "Processing your email for decentralised communication.",
-        status: "info",
-        duration: 3000,
-        isClosable: true,
-      });
+      
       onClose();
-      await props.sendMail(mailObject, props.contract);
+      if(!isGasless){
+        await props.sendMail(mailObject, props.contract);
+      } else {
+        await props.sendMailGasless(mailObject, props.web3Provider, toast );
+      }
+      
       toast({
         title: "Mail Sent.",
         description: "Message Accepted by blockchain.",
@@ -67,7 +69,7 @@ const SendModel = (props) => {
         duration: 9000,
         isClosable: true,
       });
-    }        
+    }
   };
 
   return (
@@ -83,41 +85,21 @@ const SendModel = (props) => {
       >
         New Message
       </Button>
-      <Modal
-        isOpen={isOpen}
-        size='xl'
-        onClose={onClose}
-        closeOnOverlayClick={false}
-      >
+      <Modal isOpen={isOpen} size="xl" onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>New Message</ModalHeader>
           <ModalCloseButton />
-          <form id='form' onSubmit={handleSubmit}>
+          <form id="form" onSubmit={handleSubmit}>
             <ModalBody>
               <FormControl isRequired>
-                <Input
-                  type='text'
-                  id='emailTo'
-                  placeholder='To'
-                  aria-describedby='email-helper-text'
-                />
+                <Input type="text" id="emailTo" placeholder="To" aria-describedby="email-helper-text" />
               </FormControl>
               <FormControl isRequired>
-                <Input
-                  type='text'
-                  id='subject'
-                  placeholder='Subject'
-                  aria-describedby='subject-email-helper-text'
-                />
+                <Input type="text" id="subject" placeholder="Subject" aria-describedby="subject-email-helper-text" />
               </FormControl>
               <FormControl isRequired>
-                <Textarea
-                  id='message'
-                  minH='280px'
-                  size='xl'
-                  resize='vertical'
-                />
+                <Textarea id="message" minH="280px" size="xl" resize="vertical" />
               </FormControl>
               <FormControl>
                 <label>Enter Credits:</label>
@@ -132,10 +114,10 @@ const SendModel = (props) => {
             </ModalBody>
 
             <ModalFooter>
-              <Button type='reset' variantColor='blue' mr={3} onClick={onClose}>
+              <Button type="reset" variantColor="blue" mr={3} onClick={onClose}>
                 Close
               </Button>
-              <Button type='submit' variantColor='green'>
+              <Button type="submit" variantColor="green">
                 Send
               </Button>
             </ModalFooter>

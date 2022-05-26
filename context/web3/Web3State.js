@@ -110,8 +110,15 @@ const Web3State = (props) => {
 		setDisplayMessage('Fetching Account address')
 		const address = accounts[0];
 		const networkId = await web3Provider.eth.net.getId();
-		setDisplayMessage('Loading Contract For Network')
-		const contract = await getContract(web3Provider, networkId);
+
+		setDisplayMessage('Loading Contract For Network');
+		let contract = null;
+		try{
+			contract = await getContract(web3Provider, networkId);
+		} catch {
+			console.log("failed to get contract since you were in the wrong chain.");
+		}
+
 
 		provider.on('accountsChanged', handleAccountsChanged)
 		provider.on('chainChanged', handleChainChanged)

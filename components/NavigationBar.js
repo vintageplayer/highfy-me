@@ -1,12 +1,13 @@
-import {
-  Nav,
-  Navbar,
-  Container,
-  Button
-} from 'react-bootstrap';
+import { Nav, Navbar, Container, Button, ToggleButton } from "react-bootstrap";
+import {useState, useEffect, useContext} from 'react';
+import { Switch } from '@chakra-ui/core'
+import UserContext from "../context/user/UserContext";
 
-const NavigationBar = ({disconnectHandler, address, credits}) => {
-  return (<Navbar expand="lg" variant="light">
+const NavigationBar = ({ disconnectHandler, address, credits }) => {
+  const {toogleGasMode, isGasless} = useContext(UserContext);
+
+  return (
+    <Navbar expand="lg" variant="light">
       <Container>
         <Navbar.Brand href="#home">HighFy Me</Navbar.Brand>
         <Navbar.Toggle />
@@ -21,10 +22,15 @@ const NavigationBar = ({disconnectHandler, address, credits}) => {
           </Navbar.Text>
         </Navbar.Collapse>
         <Navbar.Collapse className="justify-content-end">
-          <Button variant="outline-success" onClick={disconnectHandler}>Log Out</Button>
+          Use Gasless mode ?  <Switch isChecked={isGasless}  onChange={(e) => toogleGasMode()} size='sm' />
+        </Navbar.Collapse>
+        <Navbar.Collapse className="justify-content-end">
+          <Button variant="outline-success" onClick={disconnectHandler}>
+            Log Out
+          </Button>
         </Navbar.Collapse>
       </Container>
     </Navbar>
   );
-}
+};
 export default NavigationBar;

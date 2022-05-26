@@ -10,28 +10,37 @@ import {
 	emitCreateAccount,
 	emitSendMail,
 	emitChangeLabel,
-	emitMailAction
-} from '../../utils/mailUtils'
+	emitMailAction,
+	prepareEmitMailParams,
+	emitToRelayer,
+	isTransactionComplete,
+	prepareChangeLabelParams,
+	prepareAccountFile,
+	prepareEmitAccountParams,
+	prepareMailActionParams
+} from '../../utils/mailUtils';
+import { mailContract } from '../../contracts/abi/mailDetails';
 
 const EmailState = (props) => {
 	const [state, dispatch] = useReducer(UserReducer, initialState);
 
 	const loginUser = async (address) => {
-		setLoading();		
+		setLoading();
 		const userDetails = await getUserDetails(address);
-		if (!userDetails['data']['account']) {
-			setUserNotFound()
-			setDisplayMessage(`No Account Found for ${address}. Click on Create Account, or disconnect wallet to exit.`)
-			return // User Not Found
+
+		if (!userDetails["data"]["account"]) {
+			setUserNotFound();
+			setDisplayMessage(`No Account Found for ${address}. Click on Create Account, or disconnect wallet to exit.`);
+			return; // User Not Found
 		}
-		setUserExists()
-		setDisplayMessage('Account Found. Fetching User Keys From IPFS. Could take upto 1-2 min...')
-		const cid = userDetails['data']['account']['keyCID'];
+		setUserExists();
+		setDisplayMessage("Account Found. Fetching User Keys From IPFS. Could take upto 1-2 min...");
+		const cid = userDetails["data"]["account"]["keyCID"];
 		let keys;
 		try {
 			keys = JSON.parse(await fetchKeys(address, cid));
 		} catch (e) {
-			setDisplayMessage('Error Fetching Account Keys. Please re-try');
+			setDisplayMessage("Error Fetching Account Keys. Please re-try");
 			clearLoading();
 			return;
 		}
@@ -125,7 +134,6 @@ const EmailState = (props) => {
 		setLoading();
 		setRefreshingMail(true);
 		const messages = await getMessages(listId);
-		console.log(messages);
 		dispatch({
 			type: "SET_ACTIVE_LIST",
 			list: listId,
@@ -133,7 +141,7 @@ const EmailState = (props) => {
 		});
 	};
 
-	const setRefreshingMail = (refreshingState) => dispatch({ type: "SET_REFRESHING_MESSAGES", refreshingState })
+	const setRefreshingMail = (refreshingState) => dispatch({ type: "SET_REFRESHING_MESSAGES", refreshingState });
 
 	const setMessage = (message) => dispatch({ type: "SET_MESSAGE", payload: message });
 
@@ -171,12 +179,125 @@ const EmailState = (props) => {
 		});
 	};
 
-	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
+	const createUserGasless = async (address, web3Provider) => {
+		setLoading();
+		setDisplayMessage("Creating User Account");
+		let newUserDetails;
+		let txHash = "";
+		let transactionComplete = false;
+		let res = null;
 
-	const resetUser = () => dispatch({ type: 'RESET_USER' });	
-	const setUserExists = () => dispatch({ type: 'SET_USER_EXISTS' });
-	const setLoading = () => dispatch({ type: 'SET_LOADING' });
-	const clearLoading = () => dispatch({ type: 'CLEAR_LOADING' });
+		try {
+			newUserDetails = await prepareAccountFile(address, setDisplayMessage);
+		} catch (e) {
+			setDisplayMessage("Error Creating Account. Please re-try..");
+			clearLoading();
+			return;
+		}
+		setDisplayMessage("Sign your newly created account..");
+		const { calldata, signature } = await prepareEmitAccountParams(address, newUserDetails.keyCID, web3Provider);
+		setDisplayMessage("Storing account details on Blockchain..");
+		try {
+			txHash = await emitToRelayer(
+				address,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (e) {
+			console.log(e);
+			// Emit Event with address, and the CID
+			setDisplayMessage("Error Confirming Txn in Blockchain. Please check for success in 2 mins or retry.");
+			clearLoading();
+			return;
+		}
+
+		setDisplayMessage("Waiting for tx to complete - tx hash: " + txHash);
+
+		while (!transactionComplete) {
+			transactionComplete = await isTransactionComplete(txHash);
+			await sleep(2000);
+		}
+
+		setDisplayMessage("New User Account Created");
+		dispatch({
+			type: "NEW_USER",
+			loggedInUser: newUserDetails.address,
+			keyCID: newUserDetails.keyCID,
+			keys: newUserDetails.keys,
+		});
+	};
+
+	const sendMailGasless = async (mailObject, web3Provider, toast) => {
+		const receiver = mailObject["to"];
+		let dataCID = "";
+		let txHash = "";
+		let transactionComplete = false;
+		let res = null;
+
+		toast({
+			title: "Processing Mail.",
+			description: "Encrypting Mail...",
+			status: "info",
+			duration: 3000,
+			isClosable: true,
+		});
+
+		try{
+			dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
+			toast({
+				title: "Processing Mail.",
+				description: "Please sign the encrypted mail...",
+				status: "info",
+				duration: 3000,
+				isClosable: true,
+			});
+		} catch {
+			return {
+				error: true,
+				message: "Error pushing message to IPFS, please try again.",
+			};
+			return;
+		}
+		
+		const { calldata, signature } = await prepareEmitMailParams(mailObject, dataCID, web3Provider);
+		toast({
+			title: "Processing Mail.",
+			description: "Emiting mail to the blockchain...",
+			status: "info",
+			duration: 3000,
+			isClosable: true,
+		});
+		try {
+			txHash = await emitToRelayer(
+				state.loggedInUser,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Error pushing message to chain, please try again.",
+			};
+		}
+
+
+		while (!transactionComplete) {
+			toast({
+				title: "Processing Mail.",
+				description: "Transaction is being processed tx hash: " + txHash + "...",
+				status: "info",
+				duration: 2000,
+				isClosable: true,
+			});
+			transactionComplete = await isTransactionComplete(txHash);
+			
+			await sleep(2000);
+		}
+
+		return { error: false, message: "Mail has been submitted !" };
+	}
 
 	const sendMail = async (mailObject, contract) => {
 		const receiver = mailObject["to"];
@@ -188,13 +309,92 @@ const EmailState = (props) => {
 		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
 	};
 
+	const updateAddressLabelGasless = async (fromAddress, newLabel, web3Provider, toast) => {
+		const {calldata, signature} = await prepareChangeLabelParams(fromAddress, state.loggedInUser , newLabel, web3Provider);
+		let txHash = "";
+		let transactionComplete = false;
+
+		try {
+			txHash = await emitToRelayer(
+				state.loggedInUser,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Error pushing message to chain, please try again.",
+			};
+		}
+
+
+		while (!transactionComplete) {
+			toast({
+				title: "Processing Change.",
+				description: "Transaction is being processed tx hash: " + txHash + "...",
+				status: "info",
+				duration: 2000,
+				isClosable: true,
+			});
+			transactionComplete = await isTransactionComplete(txHash);
+			
+			await sleep(2000);
+		}
+	};
+
 	const handleActionOnMail = async (message, action, contract) => {
 		const from = message['from']['accountAddress']
 		const dataCID = message['dataCID']
 		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
 
-	const setDisplayMessage = (message) => dispatch({ type: 'SET_DISPLAY_MESSAGE', payload: message });
+	const handleActionOnMailGasless = async (message, action, web3Provider, toast) => {
+		const from = message['from']['accountAddress']
+		const dataCID = message['dataCID']
+		let txHash = "";
+		let transactionComplete = false;
+		
+		const {calldata, signature} = await prepareMailActionParams(from, state.loggedInUser, dataCID, action, web3Provider);
+
+		try {
+			txHash = await emitToRelayer(
+				state.loggedInUser,
+				calldata,
+				signature,
+				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
+			);
+		} catch (err) {
+			return {
+				error: true,
+				message: "Error pushing message to chain, please try again.",
+			};
+		}
+
+
+		while (!transactionComplete) {
+			toast({
+				title: "Processing Mail.",
+				description: "Transaction is being processed tx hash: " + txHash + "...",
+				status: "info",
+				duration: 2000,
+				isClosable: true,
+			});
+			transactionComplete = await isTransactionComplete(txHash);
+			
+			await sleep(2000);
+		}
+	};
+
+	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
+
+	const resetUser = () => dispatch({ type: "RESET_USER" });
+	const setUserExists = () => dispatch({ type: "SET_USER_EXISTS" });
+	const setLoading = () => dispatch({ type: "SET_LOADING" });
+	const clearLoading = () => dispatch({ type: "CLEAR_LOADING" });
+	const toogleGasMode = () => dispatch({type: "TOOGLE_GAS_MODE", isGasless: !state.isGasless});
+
+	const setDisplayMessage = (message) => dispatch({ type: "SET_DISPLAY_MESSAGE", payload: message });
 
 	return (
 		<UserContext.Provider
@@ -210,17 +410,25 @@ const EmailState = (props) => {
 				loginUser: loginUser,
 				resetUser: resetUser,
 				createUser: createUser,
+				createUserGasless: createUserGasless,
 				setMessage: setMessage,
 				setActiveList: setActiveList,
 				sendMail: sendMail,
 				refreshUserData: refreshUserData,
 				updateAddressLabel: updateAddressLabel,
-				handleActionOnMail: handleActionOnMail
+				handleActionOnMail: handleActionOnMail,
+				toogleGasMode: toogleGasMode,
+				isGasless: state.isGasless,
+				sendMailGasless: sendMailGasless,
+				handleActionOnMailGasless: handleActionOnMailGasless,
+				updateAddressLabelGasless: updateAddressLabelGasless,
 			}}
 		>
 			{props.children}
 		</UserContext.Provider>
 	);
 };
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export default EmailState;
