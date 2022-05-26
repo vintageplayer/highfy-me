@@ -6,7 +6,8 @@ import {
 	Button,
 	Text,
 	Grid,
-	Box
+	Box,
+	Switch
 } from "@chakra-ui/core";
 
 const CustomButton = ({children, isLoading, onClick}) => (
@@ -27,9 +28,12 @@ export default function SignIn ({userDisplayMessage, web3DisplayMessage, web3Loa
 	const {toogleGasMode, isGasless} = useContext(UserContext);
 	return (
 		<div>
-				<Flex h='5vh' justify='center' alignItems='center'>
-	        <b>HighFy Me </b>
-	      </Flex>
+				<div>
+				  <row style={{"display": "flow-root"}}>
+				  <column style={{"float": "center"}}><Flex justify='center' alignItems='center'><h1 className="title">HighFy Me</h1></Flex></column>
+				  <column style={{"float": "right"}}>Use Gasless mode ? <Switch isChecked={isGasless}  onChange={(e) => toogleGasMode()} size='sm' /> </column>
+				  </row>
+			  </div>
 	      <main>
 	        <Grid templateColumns="repeat(2, 1fr)" gap={6}>
 	        	<Box w="100%" bg='#e5f4f1'>
