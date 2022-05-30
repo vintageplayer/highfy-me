@@ -231,9 +231,6 @@ const EmailState = (props) => {
 	const sendMailGasless = async (mailObject, web3Provider, toast) => {
 		const receiver = mailObject["to"];
 		let dataCID = "";
-		let txHash = "";
-		let transactionComplete = false;
-		let res = null;
 
 		toast({
 			title: "Processing Mail.",
@@ -268,33 +265,7 @@ const EmailState = (props) => {
 			duration: 3000,
 			isClosable: true,
 		});
-		try {
-			txHash = await emitToRelayer(
-				state.loggedInUser,
-				calldata,
-				signature,
-				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
-			);
-		} catch (err) {
-			return {
-				error: true,
-				message: "Error pushing message to chain, please try again.",
-			};
-		}
-
-
-		while (!transactionComplete) {
-			toast({
-				title: "Processing Mail.",
-				description: "Transaction is being processed tx hash: " + txHash + "...",
-				status: "info",
-				duration: 2000,
-				isClosable: true,
-			});
-			transactionComplete = await isTransactionComplete(txHash);
-			
-			await sleep(2000);
-		}
+		await pushToRelayer(calldata, signature, state, toast);
 
 		return { error: false, message: "Mail has been submitted !" };
 	}
@@ -311,36 +282,7 @@ const EmailState = (props) => {
 
 	const updateAddressLabelGasless = async (fromAddress, newLabel, web3Provider, toast) => {
 		const {calldata, signature} = await prepareChangeLabelParams(fromAddress, state.loggedInUser , newLabel, web3Provider);
-		let txHash = "";
-		let transactionComplete = false;
-
-		try {
-			txHash = await emitToRelayer(
-				state.loggedInUser,
-				calldata,
-				signature,
-				mailContract.networks[process.env.NEXT_PUBLIC_MAIL_NETWORK].address
-			);
-		} catch (err) {
-			return {
-				error: true,
-				message: "Error pushing message to chain, please try again.",
-			};
-		}
-
-
-		while (!transactionComplete) {
-			toast({
-				title: "Processing Change.",
-				description: "Transaction is being processed tx hash: " + txHash + "...",
-				status: "info",
-				duration: 2000,
-				isClosable: true,
-			});
-			transactionComplete = await isTransactionComplete(txHash);
-			
-			await sleep(2000);
-		}
+		await pushToRelayer(calldata, signature, state, toast);
 	};
 
 	const handleActionOnMail = async (message, action, contract) => {
@@ -352,10 +294,16 @@ const EmailState = (props) => {
 	const handleActionOnMailGasless = async (message, action, web3Provider, toast) => {
 		const from = message['from']['accountAddress']
 		const dataCID = message['dataCID']
-		let txHash = "";
-		let transactionComplete = false;
-		
+
 		const {calldata, signature} = await prepareMailActionParams(from, state.loggedInUser, dataCID, action, web3Provider);
+
+		await pushToRelayer(calldata, signature, state, toast);
+		
+	};
+
+	const pushToRelayer = async (calldata, signature, state, toast) => {
+		let txHash;
+		let transactionComplete;
 
 		try {
 			txHash = await emitToRelayer(
@@ -384,7 +332,7 @@ const EmailState = (props) => {
 			
 			await sleep(2000);
 		}
-	};
+	}
 
 	const setUserNotFound = () => dispatch({ type: "USER_NOT_FOUND" });
 
