@@ -51,11 +51,9 @@ export default function Email() {
 	        duration: 3000,
 	        isClosable: true,
 	      });
-		  if(!isGasless){
-			await handleActionOnMail(message, action, contract);
-		  } else {
-			await handleActionOnMailGasless(message, action, web3Provider, toast);
-		  }
+
+		  await handleActionOnMail(message, action, contract, web3Provider, toast);
+
 	      
 	      toast({
 	        title: "Response Updated.",

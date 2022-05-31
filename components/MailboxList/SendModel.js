@@ -47,11 +47,8 @@ const SendModel = (props) => {
     try {
       
       onClose();
-      if(!isGasless){
-        await props.sendMail(mailObject, props.contract);
-      } else {
-        await props.sendMailGasless(mailObject, props.web3Provider, toast );
-      }
+      
+        await props.sendMail(mailObject, props.contract, props.web3Provider, toast);
       
       toast({
         title: "Mail Sent.",

@@ -36,11 +36,7 @@ const ChangeLabelModel = (props) => {
       });
       onClose();
 
-      if(!props.isGasless){
-        await props.updateAddressLabel(fromAddress, addressLabel, props.contract);
-      } else {
-        await props.updateAddressLabelGasless(fromAddress, addressLabel, props.web3Provider, toast);
-      }
+      await props.updateAddressLabel(fromAddress, addressLabel, props.contract, props.web3Provider, toast);
       
       toast({
         title: "Update Completed.",

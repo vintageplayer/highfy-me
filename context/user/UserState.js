@@ -147,7 +147,13 @@ const EmailState = (props) => {
 
 	const clearMessages = () => dispatch({ type: "CLEAR_MESSAGES" });
 
-	const createUser = async (address, contract) => {
+	const createUser = async (address, contract, web3Provider) => {
+		state.isGasless ?
+			await createUserGasless(address, web3Provider) :
+			await createUserGas(address, contract);
+	};
+
+	const createUserGas = async (address, contract) => {
 		setLoading();
 		setDisplayMessage('Creating User Account');
 		let newUserDetails;
@@ -177,7 +183,7 @@ const EmailState = (props) => {
 			keyCID: newUserDetails.keyCID,
 			keys: newUserDetails.keys,
 		});
-	};
+	}
 
 	const createUserGasless = async (address, web3Provider) => {
 		setLoading();
@@ -270,26 +276,46 @@ const EmailState = (props) => {
 		return { error: false, message: "Mail has been submitted !" };
 	}
 
-	const sendMail = async (mailObject, contract) => {
+	const sendMailGas = async (mailObject, contract) => {
 		const receiver = mailObject["to"];
 		const dataCID = await prepareMailFile(mailObject, state.userKeys["publicKey"]);
 		await emitSendMail(state.loggedInUser, receiver, dataCID, mailObject['credits'], contract);
 	};
 
-	const updateAddressLabel = async (fromAddress, newLabel, contract) => {
+	const sendMail = async (mailObject, contract, web3Provider, toast) => {
+		if (state.isGasless) {
+			await sendMailGasless(mailObject, web3Provider, toast);
+		} else {
+			await sendMailGas(mailObject, contract);
+		}
+	}
+
+	const updateAddressLabelGas = async (fromAddress, newLabel, contract) => {
 		await emitChangeLabel(fromAddress, state.loggedInUser , newLabel, contract);
 	};
+
+	const updateAddressLabel = async (fromAddress, newLabel, contract, web3Provider, toast) => {
+		state.isGasless ? 
+			await updateAddressLabelGasless(fromAddress, newLabel, web3Provider, toast) :
+			await updateAddressLabelGas(fromAddress, newLabel, contract);
+	}
 
 	const updateAddressLabelGasless = async (fromAddress, newLabel, web3Provider, toast) => {
 		const {calldata, signature} = await prepareChangeLabelParams(fromAddress, state.loggedInUser , newLabel, web3Provider);
 		await pushToRelayer(calldata, signature, state, toast);
 	};
 
-	const handleActionOnMail = async (message, action, contract) => {
+	const handleActionOnMailGas = async (message, action, contract) => {
 		const from = message['from']['accountAddress']
 		const dataCID = message['dataCID']
 		await emitMailAction(from, state.loggedInUser, dataCID, action, contract);
 	};
+
+	const handleActionOnMail = async (message, action, contract, web3Provider, toast) => {
+		state.isGasless ?
+			await handleActionOnMailGasless(message, action, web3Provider, toast) :
+			await handleActionOnMailGas(message, action, contract);
+	}
 
 	const handleActionOnMailGasless = async (message, action, web3Provider, toast) => {
 		const from = message['from']['accountAddress']
